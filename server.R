@@ -1,6 +1,7 @@
 # RScript defining the backend server functions
 
 server <- function(input, output, session) {
+  
   # read the vcf file as a reactive object
   vcf_data <- reactive({
     req(input$upload_vcf)
@@ -8,11 +9,25 @@ server <- function(input, output, session) {
     read.vcfR(input$upload_vcf$datapath)
   })
   
+  
+  # print accepted file formats
+  output$file_format_message <- renderText({
+    "
+    The VCF is a tab-delimited text file containing the sequence variations in a genome. A sample VCF file can be downloaded <a href=\"https://r-charts.com/colors/\">here </a>.
+    <br> 
+    <h3>Start here</h3>
+    Only after your file is uploaded, the results will be appear in the sidebar panels. Both compressed (.vcf.gz) and uncompressed (.vcf) file extensions are permitted."})
+  
   # print wait messsage while reading vcf file
   output$wait_message_1 <- renderText({
-  "<font color =\"#191970\"><b><i>
-    Please wait after uploading the VCF file. Basic information will pop up once processed. 
-    </b></i></font>"})
+    "Please wait after upload. A confirmation message will appear soon..."})
+  
+  output$wait_message_2 <- renderText({
+    req(vcf_summaries())
+    "<font color =\"#e2725b\"><i>
+    The VCF file is processed. All tabs are populated. Happy exploration!
+    </i></font>"}
+  )
   
   # get vcf_summaries matrix object
   vcf_summaries <- reactive({summarize_vcf(vcf_data()@fix)})
@@ -51,7 +66,7 @@ server <- function(input, output, session) {
     req(vcf_summaries())
   "<font color =\"#e2725b\"><i>
     Note: Before computing variant statistics, the comma-merged multiallelic sites 
-    (if present in the ALT column of the VCF file) are broken down into individual entries.
+    (if present in the ALT column of the VCF file) are broken down into individual entries. <br>
     If duplicate entries are present in the file, only the first occurance of the same is taken into account.
     </i></font>"}
   )
@@ -120,14 +135,6 @@ server <- function(input, output, session) {
   
   ## Interactive visualizations of variants
   
-  output$interactive_visualization_message <- renderText({
-    req(vcf_summaries())
-    "<font color =\"#191970\"><i>
-    The following plots are interactive and customizable. <br> 
-    Hover over the bars/points in the plots for interactivity. 
-    Change the variables in plot customization area to modify the visualizations.
-    </i></font>"}
-  )
   
   # Render types of SNPs plot
   output$snp_type_in_all_contigs <- renderPlotly(
@@ -187,10 +194,8 @@ server <- function(input, output, session) {
   # Print note for downloading summary statistics
   output$download_summary_message <- renderText({
     req(vcf_summaries())
-    "<font color =\"#191970\"><i>
-    You can also download the summary of the vcf generated with Sum_VCF. 
-    Enter a filename and press the download button.
-    </i></font>"}
+    "You can download the summary metrics of the uploaded VCF file. 
+    Enter a filename and press the download button."}
   )
 
   # Download summary filename
@@ -203,16 +208,14 @@ server <- function(input, output, session) {
     }
   )
   
-  # Print a dynamic table with entries in fixed part of VCF file  
+  # Print a dynamic table with entries in fixed part of VCF file
   # output$dynamic_vcf <- renderDataTable(vcf_data()@fix, options = list(pageLength = 5))
   
   
   # Print note for downloading summary statistics
-  output$sign_off_message <- renderText({
+  output$venkatesh_signing_off <- renderText({
     req(vcf_summaries())
-    "<font color =\"#191970\"><i>
-    Have a great day!
-    </i></font>"}
+    "Have a great day!"}
   )
   
   

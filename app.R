@@ -1,7 +1,7 @@
 setwd("/Users/venkateshk/Desktop/Bioinformatics/sum_vcf_local/modular_r_scripts/")
 
 # define all required libraries and load them
-required_libraries <- c("vcfR", "ggplot2", "dplyr", "tidyr", "reshape2", "shiny", "plotly")
+required_libraries <- c("vcfR", "ggplot2", "dplyr", "tidyr", "reshape2", "shiny", "plotly", "shinycustomloader")
 for (dependency in required_libraries) {
   if(!require(dependency, character.only = TRUE)){
     print("Downloading some dependencies from CRAN")
