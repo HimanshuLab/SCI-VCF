@@ -1,15 +1,15 @@
 # RScript containing modules that summarize a VCF file
 
 # Function to create summary of the VCF file
-summarize_vcf <- function(vcf_file){
+summarize_vcf <- function(vcf_file, break_multiallelic_sites = TRUE, remove_duplicated_entries = TRUE) {
   ##
   # A function that takes a vcfr fix object as input and outputs a summary matrix
+  # Parameters:
+  #   vcf_file: vcfr library object's fix file. Contains the eight compulsory columns of vcf file as a matrix
+  #   break_multiallelic_sites: Boolean. If true, the comma-separated multiallelics in vcf are broken.
+  #   remove_duplicated_entries: Boolean. If true, the duplicates present in the vcf are removed.
+  
   ##
-  
-  # Parameters for advanced users
-  break_multiallelic_sites <- TRUE
-  remove_duplicated_entries <- TRUE
-  
   
   # define all the contigs as columns for summary matrix
   stats_columns <- c("All_Contigs", unique(na.omit(vcf_file[,"CHROM"])))
@@ -31,23 +31,27 @@ summarize_vcf <- function(vcf_file){
   # Get the total number of entries in all contigs
   stats_matrix["Number_of_Entries", "All_Contigs"] <- length(na.omit(vcf_file[,"CHROM"]))
   
-  # Identify multiallelic sites
-  stats_matrix["Comma_Seperated_Entries", "All_Contigs"] <- length(which(grepl(",", vcf_file[,"ALT"])))
   
-  # Split multiallelic sites seperated by comma into individual entries
+  # Actions to take for comma-seperated multiallelic entries
   if(break_multiallelic_sites){
+    # Identify multiallelic sites
+    stats_matrix["Comma_Seperated_Entries", "All_Contigs"] <- length(which(grepl(",", vcf_file[,"ALT"])))
+    
+    # Split multiallelic sites seperated by comma into individual entries
     vcf_file <- as.matrix(separate_rows(as.data.frame(vcf_file), ALT, sep = ","))
   }
   
-  # Identify duplicated entries
-  duplicated_entries <- duplicated(paste(vcf_file[,"CHROM"], "_", 
-                                         vcf_file[,"POS"], "_",
-                                         vcf_file[,"REF"], "_",
-                                         vcf_file[,"ALT"], sep = ""))
-  stats_matrix["Duplicated_Entries", "All_Contigs"] <- sum(duplicated_entries)
   
-  # Remove duplicated entries from the VCF file
+  # Actions to take for duplicate entries
   if(remove_duplicated_entries){
+    # Identify duplicated entries
+    duplicated_entries <- duplicated(paste(vcf_file[,"CHROM"], "_", 
+                                           vcf_file[,"POS"], "_",
+                                           vcf_file[,"REF"], "_",
+                                           vcf_file[,"ALT"], sep = ""))
+    stats_matrix["Duplicated_Entries", "All_Contigs"] <- sum(duplicated_entries)
+    
+    # Remove duplicated entries from the VCF file
     vcf_file <- vcf_file[!duplicated_entries, ]
   }
   
@@ -158,7 +162,6 @@ transpose_summary <- function(vcf_summary){
 # vcf_file_2 <- read.vcfR("/Users/venkateshk/Desktop/Bioinformatics/sum_vcf_local/vcf_files/saccharomyces_cerevisiae.vcf.gz", verbose = F)
 # 
 # vcf_summary_1 <- summarize_vcf(vcf_file_1@fix)
-# vcf_summaries <- summarize_vcf(vcf_file_1@fix)
 # 
 # t_summary <- transpose_summary(vcf_summaries[1][[1]])
 # hist(vcf_summaries[2][[1]][vcf_summaries[2][[1]] != 0], breaks = 1000)

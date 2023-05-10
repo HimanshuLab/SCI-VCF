@@ -2,6 +2,40 @@
 
 server <- function(input, output, session) {
   
+  #Contents for the About page
+  output$introduction <- renderText({"
+    <h3> About </h3>
+    SCI-VCF is a multi-platform application that helps users to analyse the variant call format in a guided GUI setting. Summarize, Compare and Design Interactive Visualizations of the Variant Call Format with a mouse click!
+    <br><br>
+    <h4>Variant Call Format</h4>
+    The VCF is a tab-delimited text file containing the sequence variations in a genome. <br>
+  "})
+  
+  output$upload_size_warning <- renderText({"
+    <font color =\"#e2725b\"><i>
+    Note: By default, the upload size is limited to 20MB. To work with larger files, please refer to the 
+    <a href=\"https://r-charts.com/colors/\">FAQ </a> section in the documentation.
+    </i></font>"
+  })
+  
+  observeEvent(input$open_summarize, 
+               {updateNavbarPage(session, "navbar", "Summarize")}
+               )
+  
+  observeEvent(input$open_compare, 
+               {updateNavbarPage(session, "navbar", selected = "Compare")}
+  )
+  observeEvent(input$open_doc, 
+               {updateNavbarPage(session, "navbar", selected = "User Guide")}
+  )
+ 
+  
+  
+  
+  ################################################
+  
+  # Contents for the Summarize page
+  
   # read the vcf file as a reactive object
   vcf_data <- reactive({
     req(input$upload_vcf)
@@ -11,16 +45,14 @@ server <- function(input, output, session) {
   
   
   # print accepted file formats
-  output$file_format_message <- renderText({
+  output$sample_vcf_message_1 <- renderText({
     "
-    The VCF is a tab-delimited text file containing the sequence variations in a genome. A sample VCF file can be downloaded <a href=\"https://r-charts.com/colors/\">here </a>.
-    <br> 
-    <h3>Start here</h3>
-    Only after your file is uploaded, the results will be appear in the sidebar panels. Both compressed (.vcf.gz) and uncompressed (.vcf) file extensions are permitted."})
+    Downloaded a sample VCF file by clicking <a href=\"https://r-charts.com/colors/\">here </a>.
+    <br>"})
   
   # print wait messsage while reading vcf file
   output$wait_message_1 <- renderText({
-    "Please wait after upload. A confirmation message will appear soon..."})
+    "Post processing, the summarized results will be appear in the sidebar panels. Please wait after upload. A confirmation message will appear soon..."})
   
   output$wait_message_2 <- renderText({
     req(vcf_summaries())
@@ -148,33 +180,10 @@ server <- function(input, output, session) {
   
   
   # Render summary distribution plots
-  
-  output$summary_stat_dist_in_contig <- renderPlotly(get_summary_stat_dist_bar(sum_vcf_table(),input$summary_stat_dist_variable, input$summary_stat_dist_colour,
+  output$summary_stat_dist_in_contig <- renderPlotly(get_summary_stat_distribution(sum_vcf_table(),input$summary_stat_dist_variable, input$summary_stat_dist_plot_type ,input$summary_stat_dist_colour,
                                                                               input$summary_stat_dist_plot_title, input$summary_stat_dist_x_label, input$summary_stat_dist_y_label))
   
   
-  # observe({summary_statistic_distribution_plot_type <- input$summary_stat_dist_plot_type})
-  # 
-  # summary_stat_dist_in_contig <- reactive({
-  #   if(summary_statistic_distribution_plot_type == "Bar"){
-  #     renderPlotly(get_summary_stat_dist_bar(sum_vcf_table(),input$summary_stat_dist_variable, input$summary_stat_dist_colour,
-  #                                                                                  input$summary_stat_dist_plot_title, input$summary_stat_dist_x_label, input$summary_stat_dist_y_label))
-  #   }
-  #   if(summary_statistic_distribution_plot_type == "Line"){
-  #     renderPlotly(get_summary_stat_dist_line(sum_vcf_table(),input$summary_stat_dist_variable, input$summary_stat_dist_colour,
-  #                                                                                   input$summary_stat_dist_plot_title, input$summary_stat_dist_x_label, input$summary_stat_dist_y_label))
-  #   }
-  # })
-  
-  
-  # if(summary_statistic_distribution_plot_type() == "Bar"){
-  #   output$summary_stat_dist_in_contig <- renderPlotly(get_summary_stat_dist_bar(sum_vcf_table(),input$summary_stat_dist_variable, input$summary_stat_dist_colour,
-  #                                                                                input$summary_stat_dist_plot_title, input$summary_stat_dist_x_label, input$summary_stat_dist_y_label))
-  # }
-  # if(summary_statistic_distribution_plot_type() == "Line"){
-  #   output$summary_stat_dist_in_contig <- renderPlotly(get_summary_stat_dist_line(sum_vcf_table(),input$summary_stat_dist_variable, input$summary_stat_dist_colour,
-  #                                                                                input$summary_stat_dist_plot_title, input$summary_stat_dist_x_label, input$summary_stat_dist_y_label))
-  # }
   
   
   # Render Summary comparison plots
@@ -215,8 +224,185 @@ server <- function(input, output, session) {
   # Print note for downloading summary statistics
   output$venkatesh_signing_off <- renderText({
     req(vcf_summaries())
-    "Have a great day!"}
+    "Have a great day!"
+    })
+    
+    
+    
+  #############################################################
+  # Contents for the Compare page
+  
+  # read the vcf file uploaded first as a reactive object
+  vcf_data_left <- reactive({
+    req(input$upload_vcf_1)
+    # using vcfr library to read vcf files
+    read.vcfR(input$upload_vcf_1$datapath)
+  })
+  
+  
+  # read the vcf file uploaded second as a reactive object
+  vcf_data_right <- reactive({
+    req(input$upload_vcf_2)
+    # using vcfr library to read vcf files
+    read.vcfR(input$upload_vcf_2$datapath)
+  })
+  
+  # print accepted file formats
+  output$sample_vcf_message_2 <- renderText({
+    "
+    Download sample VCF files by clicking <a href=\"https://r-charts.com/colors/\">here </a>.
+    <br>"})
+  
+  # print wait messsage while reading vcf file
+  output$wait_message_compare_1 <- renderText({
+    "Post processing, the comparison results will be appear in the sidebar panels. Please wait after upload. A confirmation message will appear soon..."
+    })
+  
+  output$wait_message_compare_2 <- renderText({
+    req(vcf_comp_summary_both())
+    "<font color =\"#e2725b\"><i>
+    The VCF files are processed. All tabs are populated. Happy exploration!
+    <br>
+    </i></font>"}
   )
+  
+  # Get the comparison result for the uploaded files
+  comparison_result <- reactive({compare_vcf(vcf_data_left()@fix, vcf_data_right()@fix)})
+  
+  # get vcf_summaries matrix objects for the three comparison variant list
+  comparison_summary_left <- reactive({summarize_vcf(comparison_result()[1][[1]], break_multiallelic_sites = FALSE, remove_duplicated_entries = FALSE)})
+  comparison_summary_right <- reactive({summarize_vcf(comparison_result()[2][[1]], break_multiallelic_sites = FALSE, remove_duplicated_entries = FALSE)})
+  comparison_summary_both <- reactive({summarize_vcf(comparison_result()[3][[1]], break_multiallelic_sites = FALSE, remove_duplicated_entries = FALSE)})
+  
+  # Get a table of statistics
+  vcf_comp_summary_left <- reactive(transpose_summary(comparison_summary_left()[1][[1]]))
+  vcf_comp_summary_right <- reactive(transpose_summary(comparison_summary_right()[1][[1]]))
+  vcf_comp_summary_both <- reactive(transpose_summary(comparison_summary_both()[1][[1]]))
+  
+  
+  # Render Venn Diagram for comparison
+  output$venn_diagram_comparison <- renderPlot(
+    get_venn_diagram_comparison(vcf_comp_summary_left(), vcf_comp_summary_right(), vcf_comp_summary_both(), input$venn_summary_stat,  input$venn_color_1, input$venn_color_2, input$venn_file_1_label, input$venn_file_2_label)
+  )
+  
+  # Render variant distribution plot for each variant set in each contig
+  output$variant_comp_set_dist_in_contig <- renderPlotly(
+    get_all_variant_distribution_in_ech_set(comparison_result(), input$variant_comp_set, input$variant_comp_set_dist_fill_colour, input$variant_comp_set_dist_plot_title, input$variant_comp_set_dist_x_label, input$variant_comp_set_dist_y_label)
+  )
+  
+  # Render summary distribution plots
+  output$variant_com_set_summary_stat_dist <- renderPlotly(get_summary_stat_distribution_in_each_set(vcf_comp_summary_left(), vcf_comp_summary_right(), vcf_comp_summary_both(), input$variant_comp_set_summary,
+                                                                                                     input$variant_comp_set_summary_stat_dist_variable, input$variant_comp_set_summary_stat_dist_plot_type, 
+                                                                                                     input$variant_comp_set_summary_stat_dist_colour, input$variant_comp_set_summary_stat_dist_plot_title, 
+                                                                                                     input$variant_comp_set_summary_stat_dist_x_label, input$variant_comp_set_summary_stat_dist_y_label))
+  
+  # Print note for downloading summary statistics
+  output$download_com_sum_message <- renderText({
+    req(vcf_comp_summary_both())
+    "You can download the summary metrics of the variants after VCF comparison. 
+    Enter a filename and press the download button."}
+  )
+  
+  # Download summary files for left
+  output$download_com_sum_left <- downloadHandler(
+    filename = function() {
+      paste0(input$download_summary_left_filename, ".csv")
+    },
+    content = function(file) {
+      write.csv(vcf_comp_summary_left(), file)
+    }
+  )
+  # Download summary files for right 
+  output$download_com_sum_right <- downloadHandler(
+    filename = function() {
+      paste0(input$download_summary_right_filename, ".csv")
+    },
+    content = function(file) {
+      write.csv(vcf_comp_summary_right(), file)
+    }
+  )
+  # Download summary files for both
+  output$download_com_sum_both <- downloadHandler(
+    filename = function() {
+      paste0(input$download_summary_both_filename, ".csv")
+    },
+    content = function(file) {
+      write.csv(vcf_comp_summary_both(), file)
+    }
+  )
+  
+  
+  
+  # Print note for downloading variant list
+  output$download_com_var_message <- renderText({
+    req(vcf_comp_summary_both())
+    "You can download the list of the variants present in each join sets after VCF comparison. 
+    Enter a filename and press the download button."}
+  )
+  
+  # Download variant list for left
+  output$download_com_var_left <- downloadHandler(
+    filename = function() {
+      paste0(input$download_variants_left_filename, ".csv")
+    },
+    content = function(file) {
+      write.csv(comparison_result()[1][[1]], file)
+    }
+  )
+  
+  # Download variant list for right
+  output$download_com_var_right <- downloadHandler(
+    filename = function() {
+      paste0(input$download_variants_right_filename, ".csv")
+    },
+    content = function(file) {
+      write.csv(comparison_result()[2][[1]], file)
+    }
+  )
+  
+  # Download variant list for left_and_right
+  output$download_com_var_left_and_right <- downloadHandler(
+    filename = function() {
+      paste0(input$download_variants_left_and_right_filename, ".csv")
+    },
+    content = function(file) {
+      write.csv(comparison_result()[3][[1]], file)
+    }
+  )
+  
+  # Download variant list for right_and_left
+  output$download_com_var_right_and_left <- downloadHandler(
+    filename = function() {
+      paste0(input$download_variants_right_and_left_filename, ".csv")
+    },
+    content = function(file) {
+      write.csv(comparison_result()[4][[1]], file)
+    }
+  )
+  
+  
+  output$venkatesh_signing_off_again <- renderText({
+    req(vcf_comp_summary_both())
+    "Have a great day!"
+  })
+  
+  ##############################
+  # Contents for User Guide
+  
+  
+  ##################################
+  # Footer
+  output$footer_message <- renderText({
+    "
+    <br style = \"line-height:10;\">
+    <p style = \"text-align: center; padding: 10px; border: 0.5px #808080; background: #f5f5f5;\">
+    <font color =\"#000000;\" size = \"1\"><i>
+     &#169; IBSE - IITM, All Rights Reserved by <a href=\"https://r-charts.com/colors/\"> IBSE </a> 
+     <br>
+     Designed and Developed by <a href=\"https://r-charts.com/colors/\">Venkatesh K </a>.
+    </i></font>
+    </p>"
+  })
   
   
 }
