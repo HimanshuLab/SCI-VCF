@@ -426,8 +426,8 @@ ui <- navbarPage("SCI-VCF",
                       # Get inputs for variant contig distribution plot customization
                       fluidRow(
                         column(4, selectizeInput("variant_comp_set_overall_summary", "Select a variants set", 
-                                                 choices = c("Variants private to File 1", "Variants private to File 2", "Variants present in both files"),
-                                                 selected = "Variants present in both files")),
+                                                 choices = c("Variants unique to File 1", "Variants unique to File 2", "Variants intersecting in both files"),
+                                                 selected = "Variants intersecting in both files")),
                         column(4, selectizeInput("variant_comp_set_overall_summary_type", "Select variant type",
                                choices = c("All Variants", "SNPs", "INDELs"), selected = "All Variants")),
                         column(4, textInput("variant_comp_set_overall_summary_plot_title", "Enter plot title", value = "Basic Summary"))
@@ -455,8 +455,8 @@ ui <- navbarPage("SCI-VCF",
                       p("You can edit the following parameters to customize the plot. 
                         Changes made in this zone will be reflected in the plot in real time."),
                       selectizeInput("variant_comp_set", "Pick a set of variants to visualise the distribution", 
-                                     choices = c("Variants private to File 1", "Variants private to File 2", "Variants present in both files"),
-                                     selected = "Variants present in both files"),
+                                     choices = c("Variants unique to File 1", "Variants unique to File 2", "Variants intersecting in both files"),
+                                     selected = "Variants intersecting in both files"),
                       # Get inputs for variant contig distribution plot customization
                       fluidRow(
                         column(6, textInput("variant_comp_set_dist_plot_title", "Enter plot Title", value = "Variant Distribution")),
@@ -492,8 +492,8 @@ ui <- navbarPage("SCI-VCF",
                       # Get inputs for variant contig distribution plot customization
                       fluidRow(
                         column(4, selectizeInput("variant_comp_set_summary", "Select variants set", 
-                                       choices = c("Variants private to File 1", "Variants private to File 2", "Variants present in both files"),
-                                       selected = "Variants present in both files")),
+                                       choices = c("Variants unique to File 1", "Variants unique to File 2", "Variants intersecting in both files"),
+                                       selected = "Variants intersecting in both files")),
                         column(4, selectInput("variant_comp_set_summary_stat_dist_variable", "Select summary statistic",
                                               choices = c("All_Variants", "SNPs" , "INDELs", "MNPs", "Assorted_Variants", "Multiallelic_Sites",
                                                           "Insertions", "Deletions", "Transitions", "Transversions",
@@ -530,19 +530,19 @@ ui <- navbarPage("SCI-VCF",
                       h3("Delve Deep"),
                       withLoader(textOutput("download_com_sum_message"), type = "html", loader = "dnaspin"),
                       br(),
-                      h4("Summary of variants private to File no. 1:"),
+                      h4("Summary of variants unique to File no. 1:"),
                       fluidRow(
-                        column(6, textInput("download_summary_left_filename", "File Name", value = "Left_Summary_Statistics")),
+                        column(6, textInput("download_summary_left_filename", "File Name", value = "File_1_unique_variants_Summary_Statistics")),
                         column(6, downloadButton("download_com_sum_left", "Download .csv"))
                       ),
-                      h4("Summary of variants private to File no. 2:"),
+                      h4("Summary of variants unique to File no. 2:"),
                       fluidRow(
-                        column(6, textInput("download_summary_right_filename", "File Name", value = "Right_Summary_Statistics")),
+                        column(6, textInput("download_summary_right_filename", "File Name", value = "File_2_unique_variants_Summary_Statistics")),
                         column(6, downloadButton("download_com_sum_right", "Download .csv"))
                       ),
-                      h4("Summary of variants present in both files:"),
+                      h4("Summary of variants intersecting both files:"),
                       fluidRow(
-                        column(6, textInput("download_summary_both_filename", "File Name", value = "Both_Summary_Statistics")),
+                        column(6, textInput("download_summary_both_filename", "File Name", value = "Intersection_variants_Summary_Statistics")),
                         column(6, downloadButton("download_com_sum_both", "Download .csv"))
                       ),
                       linebreaks(3),
@@ -561,24 +561,24 @@ ui <- navbarPage("SCI-VCF",
                       h3("Delve Deeper"),
                       withLoader(textOutput("download_com_var_message"), type = "html", loader = "dnaspin"),
                       br(),
-                      h4("Variants private to File no. 1:"),
+                      h4("Variants unique to File no. 1:"),
                       fluidRow(
-                        column(6, textInput("download_variants_left_filename", "File Name", value = "Left_Variants")),
+                        column(6, textInput("download_variants_left_filename", "File Name", value = "File_1_unique_variants")),
                         column(6, downloadButton("download_com_var_left", "Download .csv"))
                       ),
-                      h4("Variants private to File no. 2:"),
+                      h4("Variants unique to File no. 2:"),
                       fluidRow(
-                        column(6, textInput("download_variants_right_filename", "File Name", value = "Right_variants")),
+                        column(6, textInput("download_variants_right_filename", "File Name", value = "File_2_unique_variants")),
                         column(6, downloadButton("download_com_var_right", "Download .csv"))
                       ),
-                      h4("Variants present in both files with annotations from file no. 1:"),
+                      h4("Variants intersecting in both files with annotations from file no. 1:"),
                       fluidRow(
-                        column(6, textInput("download_variants_left_and_right_filename", "File Name", value = "Both_Variants_Left_Annotation")),
+                        column(6, textInput("download_variants_left_and_right_filename", "File Name", value = "Intersection_variants_with_file_1_Annotation")),
                         column(6, downloadButton("download_com_var_left_and_right", "Download .csv"))
                       ),
-                      h4("Variants present in both files with annotations from file no. 2:"),
+                      h4("Variants intersecting in both files with annotations from file no. 2:"),
                       fluidRow(
-                        column(6, textInput("download_variants_right_and_left_filename", "File Name", value = "Both_Variants_Right_Annotation")),
+                        column(6, textInput("download_variants_right_and_left_filename", "File Name", value = "Intersection_variants_with_file_2_Annotation")),
                         column(6, downloadButton("download_com_var_right_and_left", "Download .csv"))
                       ),
                       linebreaks(5),

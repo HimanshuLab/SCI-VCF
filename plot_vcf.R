@@ -272,15 +272,15 @@ get_all_variant_distribution_in_ech_set <- function(vcf_set_list, selected_varia
   
   print("Render distribution of variants plot for comparison sets")
   
-  if(selected_variant_set == "Variants private to File 1"){
+  if(selected_variant_set == "Variants unique to File 1"){
     vcf_file_subset <- as.data.frame(vcf_set_list[1][[1]])
   }
   
-  if(selected_variant_set == "Variants private to File 2"){
+  if(selected_variant_set == "Variants unique to File 2"){
     vcf_file_subset <- as.data.frame(vcf_set_list[2][[1]])
   }
   
-  if(selected_variant_set == "Variants present in both files"){
+  if(selected_variant_set == "Variants intersecting in both files"){
     vcf_file_subset <- as.data.frame(vcf_set_list[3][[1]])
   }
   
@@ -314,15 +314,15 @@ get_summary_stat_distribution_in_each_set <- function(vcf_comp_sum_left, vcf_com
   print("Render summary statistic distribution Plot for Comparison sets")
   
   # Select the variant set
-  if(selected_variant_set == "Variants private to File 1"){
+  if(selected_variant_set == "Variants unique to File 1"){
     df <- vcf_comp_sum_left[(vcf_comp_sum_left$Contig != "All_Contigs"), c("Contig", summary_stat)]
   }
   
-  if(selected_variant_set == "Variants private to File 2"){
+  if(selected_variant_set == "Variants unique to File 2"){
     df <- vcf_comp_sum_right[(vcf_comp_sum_right$Contig != "All_Contigs"), c("Contig", summary_stat)]
   }
   
-  if(selected_variant_set == "Variants present in both files"){
+  if(selected_variant_set == "Variants intersecting in both files"){
     df <- vcf_comp_sum_both[(vcf_comp_sum_both$Contig != "All_Contigs"), c("Contig", summary_stat)]
   }
   
@@ -372,15 +372,15 @@ get_overall_summary_distribution_for_ech_set <- function(vcf_comp_sum_left, vcf_
   print("Render variant sets' summary pie charts")
   
   # Select the variant set
-  if(selected_variant_set == "Variants private to File 1"){
+  if(selected_variant_set == "Variants unique to File 1"){
     df <- vcf_comp_sum_left[(vcf_comp_sum_left$Contig == "All_Contigs"), ]
   }
   
-  if(selected_variant_set == "Variants private to File 2"){
+  if(selected_variant_set == "Variants unique to File 2"){
     df <- vcf_comp_sum_right[(vcf_comp_sum_right$Contig == "All_Contigs"), ]
   }
   
-  if(selected_variant_set == "Variants present in both files"){
+  if(selected_variant_set == "Variants intersecting in both files"){
     df <- vcf_comp_sum_both[(vcf_comp_sum_both$Contig == "All_Contigs"), ]
   }
   
