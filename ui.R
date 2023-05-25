@@ -550,8 +550,7 @@ ui <- navbarPage("SCI-VCF",
                         column(2, actionButton("compare_download_summ_previous", icon = icon("circle-chevron-left"), label = "Previous", width = 100)),
                         column(8, hr()),
                         column(2, actionButton("compare_download_summ_next", icon = icon("circle-chevron-right"), label = "Next", width = 100))
-                      ),
-                      linebreaks(5)
+                      )
              ),
              
              
@@ -604,9 +603,29 @@ ui <- navbarPage("SCI-VCF",
   ), # End of User guide panel
   
   tabPanel("Contact",
-           h3("About"),
-           h4("Email"),
-           h4("Github")
+           h3("Contact Us"),
+           br(),
+           p("Feel free to contact us for any questions or suggestions."),
+           br(),
+           fluidRow(
+             column(3, p("View Source Code / Raise Issues:")),
+             column(3, actionLink("contact_github", label = "Github", icon = icon("github"), width = 150)),
+             column(3, p("Pull Docker Image:")),
+             column(3, actionLink("contact_docker", label = "Docker", icon = icon("docker"), width = 150))
+           ),
+           br(),
+           fluidRow(
+             column(3, p("Read Detailed Documentation:")),
+             column(3, actionLink("contact_documentation", label = "Documentation", icon = icon("book"), width = 150)),
+             column(3, p("Visit IBSE website:")),
+             column(3, actionLink("contact_ibse", label = "IBSE", icon = icon("building-user"), width = 150))
+           ),
+           br(),
+           h3("Citation"),
+           br(),
+           p("..."),
+           linebreaks(5)
+           
   ), # End of Contact panel
   
   id = "navbar",
