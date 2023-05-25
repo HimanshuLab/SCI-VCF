@@ -151,7 +151,7 @@ get_summary_stat_distribution <- function(vcf_sum_table, summary_stat, plot_type
 
 
 
-get_summary_comparison_plot_bar <- function(vcf_sum_table, summary_stat_1, summary_stat_2, col_fill_1, col_fill_2, plot_title, x_label, y_label){
+get_summary_comparison_plot <- function(vcf_sum_table, summary_stat_1, summary_stat_2, col_fill_1, col_fill_2, plot_title, x_label, y_label){
   # A function that returns bar plot with comparison of two selected summary statistics
   # Parameters
   # vcf_summary:first entry in the list returned by summarize_vcf function
@@ -184,6 +184,61 @@ get_summary_comparison_plot_bar <- function(vcf_sum_table, summary_stat_1, summa
 
 
 
+get_overall_summary_plot <- function(vcf_sum_table, selected_variant_type, plot_title){
+  # A function that returns pie charts of distribution variant types
+  # Parameters
+  # vcf_comp_sum_left, vcf_comp_sum_right, vcf_comp_sum_both: first entry in the list returned by summarize_vcf function
+  # 
+  
+  print("Render variants summary donut charts")
+  
+  # Select the variant set
+  df <- vcf_sum_table[(vcf_sum_table$Contig == "All_Contigs"), ]
+  
+  if(selected_variant_type == "All Variants"){
+    all_variant_type_labels <- c("SNPs" , "INDELs", "MNPs", "Assorted_Variants")
+    all_variant_type_values <- c(df["All_Contigs", "SNPs"], df["All_Contigs", "INDELs"], df["All_Contigs", "MNPs"], df["All_Contigs", "Assorted_Variants"])
+    
+    donut_plot <- plot_ly(labels = all_variant_type_labels, values = all_variant_type_values, textinfo='label+percent') %>% 
+      add_pie(hole = 0.6) %>% 
+      layout(title = plot_title,  showlegend = T,
+             xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+             yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+  }
+  
+  if(selected_variant_type == "SNPs"){
+    snp_type_labels <- c("Transitions", "Transversions")
+    snp_type_values <- c(df["All_Contigs", "Transitions"], df["All_Contigs", "Transversions"])
+    
+    donut_plot <- plot_ly(labels = snp_type_labels, values = snp_type_values, textinfo='label+percent') %>% 
+      add_pie(hole = 0.6) %>% 
+      layout(title = plot_title,  showlegend = T,
+             xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+             yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+  }
+  
+  if(selected_variant_type == "INDELs"){
+    indel_type_labels <- c("Insertions", "Deletions")
+    indel_type_values <- c(df["All_Contigs", "Insertions"], df["All_Contigs", "Deletions"])
+    
+    donut_plot <- plot_ly(labels = indel_type_labels, values = indel_type_values, textinfo='label+percent') %>% 
+      add_pie(hole = 0.6) %>% 
+      layout(title = plot_title,  showlegend = T,
+             xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+             yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+    
+  }
+  
+  
+  #make donut plots for all variants
+  donut_plot %>%
+    config(displayModeBar = "static", displaylogo = FALSE)
+  
+  
+  return(donut_plot)
+}
+
+
 get_venn_diagram_comparison <- function(summary_left, summary_right, summary_both, summary_stat, col_fill_1, col_fill_2, file_1_label, file_2_label){
   # A function that returns bar plot with comparison of two selected summary statistics
   # Parameters
@@ -191,9 +246,9 @@ get_venn_diagram_comparison <- function(summary_left, summary_right, summary_bot
   # summary_stat_1, summary_stat_2: Entries from vcf_summary
   
   print("Render Venn Diagram for VCF comparison")
-  file_1_private_value <- summary_left[(summary_left$Contig = "All_Contigs"), summary_stat]
-  file_2_private_value <- summary_right[(summary_left$Contig = "All_Contigs"), summary_stat]
-  files_intersection_value <- summary_both[(summary_left$Contig = "All_Contigs"), summary_stat]
+  file_1_private_value <- summary_left[(summary_left$Contig == "All_Contigs"), summary_stat]
+  file_2_private_value <- summary_right[(summary_left$Contig == "All_Contigs"), summary_stat]
+  files_intersection_value <- summary_both[(summary_left$Contig == "All_Contigs"), summary_stat]
   
   
   initialize_eulerr <- euler(c("A" = file_1_private_value, "B" = file_2_private_value, "A&B" =  files_intersection_value))
@@ -258,6 +313,7 @@ get_summary_stat_distribution_in_each_set <- function(vcf_comp_sum_left, vcf_com
   
   print("Render summary statistic distribution Plot for Comparison sets")
   
+  # Select the variant set
   if(selected_variant_set == "Variants private to File 1"){
     df <- vcf_comp_sum_left[(vcf_comp_sum_left$Contig != "All_Contigs"), c("Contig", summary_stat)]
   }
@@ -307,6 +363,70 @@ get_summary_stat_distribution_in_each_set <- function(vcf_comp_sum_left, vcf_com
   return(summary_stat_bar_plotly)
 }
 
+get_overall_summary_distribution_for_ech_set <- function(vcf_comp_sum_left, vcf_comp_sum_right, vcf_comp_sum_both, selected_variant_set, selected_variant_type, plot_title){
+  # A function that returns pie charts of distribution variant types
+  # Parameters
+  # vcf_comp_sum_left, vcf_comp_sum_right, vcf_comp_sum_both: first entry in the list returned by summarize_vcf function
+  # 
+  
+  print("Render variant sets' summary pie charts")
+  
+  # Select the variant set
+  if(selected_variant_set == "Variants private to File 1"){
+    df <- vcf_comp_sum_left[(vcf_comp_sum_left$Contig == "All_Contigs"), ]
+  }
+  
+  if(selected_variant_set == "Variants private to File 2"){
+    df <- vcf_comp_sum_right[(vcf_comp_sum_right$Contig == "All_Contigs"), ]
+  }
+  
+  if(selected_variant_set == "Variants present in both files"){
+    df <- vcf_comp_sum_both[(vcf_comp_sum_both$Contig == "All_Contigs"), ]
+  }
+  
+  
+  if(selected_variant_type == "All Variants"){
+    all_variant_type_labels <- c("SNPs" , "INDELs", "MNPs", "Assorted_Variants")
+    all_variant_type_values <- c(df["All_Contigs", "SNPs"], df["All_Contigs", "INDELs"], df["All_Contigs", "MNPs"], df["All_Contigs", "Assorted_Variants"])
+    
+    donut_plot <- plot_ly(labels = all_variant_type_labels, values = all_variant_type_values, textinfo='label+percent') %>% 
+      add_pie(hole = 0.6) %>% 
+      layout(title = plot_title,  showlegend = T,
+             xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+             yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+  }
+  
+  if(selected_variant_type == "SNPs"){
+    snp_type_labels <- c("Transitions", "Transversions")
+    snp_type_values <- c(df["All_Contigs", "Transitions"], df["All_Contigs", "Transversions"])
+    
+    donut_plot <- plot_ly(labels = snp_type_labels, values = snp_type_values, textinfo='label+percent') %>% 
+      add_pie(hole = 0.6) %>% 
+      layout(title = plot_title,  showlegend = T,
+             xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+             yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+  }
+  
+  if(selected_variant_type == "INDELs"){
+    indel_type_labels <- c("Insertions", "Deletions")
+    indel_type_values <- c(df["All_Contigs", "Insertions"], df["All_Contigs", "Deletions"])
+    
+    donut_plot <- plot_ly(labels = indel_type_labels, values = indel_type_values, textinfo='label+percent') %>% 
+      add_pie(hole = 0.6) %>% 
+      layout(title = plot_title,  showlegend = T,
+             xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+             yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+    
+  }
+  
+  
+  # customize donut plots for all variant types
+  donut_plot %>%
+    config(displayModeBar = "static", displaylogo = FALSE)
+  
+  
+  return(donut_plot)
+}
 
 
 

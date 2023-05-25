@@ -1,4 +1,4 @@
-site_name: Sum_VCF
+site_name: SCI-VCF
 nav:
     - Home: index.md
     - About: about.md

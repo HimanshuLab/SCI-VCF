@@ -1,6 +1,6 @@
 # Features
 
-SumVCF has some amazing features
+SCI-VCF has some amazing features
 
 ## Interactive Plots
 #### Download 

@@ -1,4 +1,4 @@
-# About SumVCF
+# About SCI-VCF
 
 Summarize, Compare and visualize the Variant Call File format with a mouse click!
 

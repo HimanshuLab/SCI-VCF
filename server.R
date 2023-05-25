@@ -5,31 +5,40 @@ server <- function(input, output, session) {
   #Contents for the About page
   output$introduction <- renderText({"
     <h3> About </h3>
-    SCI-VCF is a multi-platform application that helps users to analyse the variant call format in a guided GUI setting. Summarize, Compare and Design Interactive Visualizations of the Variant Call Format with a mouse click!
+    SCI-VCF is a multi-platform application that helps users to analyse the variant call format in a guided GUI setting. 
+    Summarize, compare and design interactive visualizations of VCFs with a mouse click!
     <br><br>
     <h4>Variant Call Format</h4>
-    The VCF is a tab-delimited text file containing the sequence variations in a genome. <br>
+    The VCF is a standardized file format, used to store and share the sequence variations in a genome. 
+    It is widely adopted and is used in many bioinformatics tools that analyze genomic variants. <br><br>
   "})
   
   output$upload_size_warning <- renderText({"
     <font color =\"#e2725b\"><i>
-    Note: By default, the upload size is limited to 20MB. To work with larger files, please refer to the 
+    Note: By default, the upload size is limited to 20MB. To work with larger VCFs, please refer to the 
     <a href=\"https://r-charts.com/colors/\">FAQ </a> section in the documentation.
     </i></font>"
   })
   
+  #Action for summarize button in home page
   observeEvent(input$open_summarize, 
                {updateNavbarPage(session, "navbar", "Summarize")}
                )
   
+  #Action for compare button in home page
   observeEvent(input$open_compare, 
                {updateNavbarPage(session, "navbar", selected = "Compare")}
   )
+  
+  #Action for user guide button in home page
   observeEvent(input$open_doc, 
                {updateNavbarPage(session, "navbar", selected = "User Guide")}
   )
  
-  
+  #Action for contact button in home page
+  observeEvent(input$open_contact, 
+               {updateNavbarPage(session, "navbar", selected = "Contact")}
+  )
   
   
   ################################################
@@ -74,7 +83,7 @@ server <- function(input, output, session) {
   )
   
   output$no_of_contigs <- renderText(
-    paste("Number of contigs: ", (length(colnames(vcf_summaries()[1][[1]])) -1))
+    paste("Number of contigs with variants: ", (length(colnames(vcf_summaries()[1][[1]])) -1))
   )
  
   output$filter_column_entries <- renderText(
@@ -167,6 +176,8 @@ server <- function(input, output, session) {
   
   ## Interactive visualizations of variants
   
+  # Render donut plots for overall summary
+  output$variants_overall_summary <- renderPlotly(get_overall_summary_plot(sum_vcf_table(), input$overall_summary_variant_type, input$overall_summary_plot_title))
   
   # Render types of SNPs plot
   output$snp_type_in_all_contigs <- renderPlotly(
@@ -178,6 +189,11 @@ server <- function(input, output, session) {
     get_indel_size_distribution_plot(vcf_summaries()[2][[1]], input$insertion_fill_colour,input$deletion_fill_colour, input$indel_size_plot_title, input$indel_size_x_label, input$indel_size_y_label)
   )
   
+  output$indel_size_in_all_contigs_summary <- renderTable(
+    indel_size_summary(vcf_summaries()[2][[1]])
+  )
+  
+  
   
   # Render summary distribution plots
   output$summary_stat_dist_in_contig <- renderPlotly(get_summary_stat_distribution(sum_vcf_table(),input$summary_stat_dist_variable, input$summary_stat_dist_plot_type ,input$summary_stat_dist_colour,
@@ -187,10 +203,11 @@ server <- function(input, output, session) {
   
   
   # Render Summary comparison plots
-  output$summary_comp_in_contig <- renderPlotly(get_summary_comparison_plot_bar(sum_vcf_table(),input$summary_comp_variable_1,input$summary_comp_variable_2, 
+  output$summary_comp_in_contig <- renderPlotly(get_summary_comparison_plot(sum_vcf_table(),input$summary_comp_variable_1,input$summary_comp_variable_2, 
                                                                                 input$summary_comp_colour_1, input$summary_comp_colour_2,
                                                                                input$summary_comp_plot_title, input$summary_comp_x_label, input$summary_comp_y_label))
-  
+    
+ 
   
   # Render variant distribution plot for each contig
   output$variant_dist_in_contig <- renderPlotly(
@@ -227,7 +244,70 @@ server <- function(input, output, session) {
     "Have a great day!"
     })
     
-    
+  # Add functionalities to next/previous buttons in summarize tab
+  observeEvent(input$summarize_upload_file_previous, 
+               {updateNavbarPage(session, "navbar", "Home")}
+  )
+  
+  observeEvent(input$summarize_upload_file_next, 
+               {updateNavlistPanel(session, "Summarize", "overall_summary")}
+  )
+  
+  observeEvent(input$summarize_basic_previous, 
+               {updateNavlistPanel(session, "Summarize", "upload_vcf")}
+  )
+  
+  observeEvent(input$summarize_basic_next, 
+               {updateNavlistPanel(session, "Summarize", "variant_dist")}
+  )
+  
+  observeEvent(input$summarize_var_dist_previous, 
+               {updateNavlistPanel(session, "Summarize", "overall_summary")}
+  )
+  
+  observeEvent(input$summarize_var_dist_next, 
+               {updateNavlistPanel(session, "Summarize", "snp_dist")}
+  )
+  
+  observeEvent(input$summarize_snp_dist_previous, 
+                {updateNavlistPanel(session, "Summarize", "variant_dist")}
+  )
+  
+  observeEvent(input$summarize_snp_dist_next, 
+               {updateNavlistPanel(session, "Summarize", "indel_dist")}
+  )
+  
+  observeEvent(input$summarize_indel_dist_previous, 
+               {updateNavlistPanel(session, "Summarize", "snp_dist")}
+  )
+  
+  observeEvent(input$summarize_indel_dist_next, 
+               {updateNavlistPanel(session, "Summarize", "summary_stat_dist")}
+  )
+  
+  observeEvent(input$summarize_sum_dist_previous, 
+               {updateNavlistPanel(session, "Summarize", "indel_dist")}
+  )
+  
+  observeEvent(input$summarize_sum_dist_next, 
+               {updateNavlistPanel(session, "Summarize", "summary_comp_dist")}
+  )
+  
+  observeEvent(input$summarize_sum_comp_previous, 
+               {updateNavlistPanel(session, "Summarize", "summary_stat_dist")}
+  )
+  
+  observeEvent(input$summarize_sum_comp_next, 
+               {updateNavlistPanel(session, "Summarize", "download_summary")}
+  )
+  
+  observeEvent(input$summarize_download_list_previous, 
+               {updateNavlistPanel(session, "Summarize", "summary_comp_dist")}
+  )
+  
+  observeEvent(input$summarize_download_list_next, 
+               {updateNavbarPage(session, "navbar", "Home")}
+  )
     
   #############################################################
   # Contents for the Compare page
@@ -280,6 +360,11 @@ server <- function(input, output, session) {
   vcf_comp_summary_both <- reactive(transpose_summary(comparison_summary_both()[1][[1]]))
   
   
+  # Render donut plots for overall summary of each variant set
+  output$variant_com_set_overall_summary <- renderPlotly(get_overall_summary_distribution_for_ech_set(vcf_comp_summary_left(), vcf_comp_summary_right(), 
+                                                                                                     vcf_comp_summary_both(), input$variant_comp_set_overall_summary,
+                                                                                                     input$variant_comp_set_overall_summary_type, input$variant_comp_set_overall_summary_plot_title))
+  
   # Render Venn Diagram for comparison
   output$venn_diagram_comparison <- renderPlot(
     get_venn_diagram_comparison(vcf_comp_summary_left(), vcf_comp_summary_right(), vcf_comp_summary_both(), input$venn_summary_stat,  input$venn_color_1, input$venn_color_2, input$venn_file_1_label, input$venn_file_2_label)
@@ -295,6 +380,7 @@ server <- function(input, output, session) {
                                                                                                      input$variant_comp_set_summary_stat_dist_variable, input$variant_comp_set_summary_stat_dist_plot_type, 
                                                                                                      input$variant_comp_set_summary_stat_dist_colour, input$variant_comp_set_summary_stat_dist_plot_title, 
                                                                                                      input$variant_comp_set_summary_stat_dist_x_label, input$variant_comp_set_summary_stat_dist_y_label))
+  
   
   # Print note for downloading summary statistics
   output$download_com_sum_message <- renderText({
@@ -384,6 +470,81 @@ server <- function(input, output, session) {
   output$venkatesh_signing_off_again <- renderText({
     req(vcf_comp_summary_both())
     "Have a great day!"
+  })
+  
+  
+  # Add functionalities to next/previous buttons in compare tab
+  observeEvent(input$compare_upload_vcfs_previous, 
+               {updateNavbarPage(session, "navbar", "Home")}
+  )
+  
+  observeEvent(input$compare_upload_vcfs_next, 
+               {updateNavlistPanel(session, "Compare", "venn_diagram")}
+  )
+  
+  observeEvent(input$compare_venn_diagram_previous, 
+               {updateNavlistPanel(session, "Compare", "upload_vcfs")}
+  )
+  
+  observeEvent(input$compare_venn_diagram_next, 
+               {updateNavlistPanel(session, "Compare", "overall_summaries")}
+  )
+  
+  observeEvent(input$compare_overall_summary_previous, 
+               {updateNavlistPanel(session, "Compare", "venn_diagram")}
+  )
+  
+  observeEvent(input$compare_overall_summary_next, 
+               {updateNavlistPanel(session, "Compare", "variants_dist")}
+  )
+  
+  observeEvent(input$compare_variant_dist_previous, 
+               {updateNavlistPanel(session, "Compare", "overall_summaries")}
+  )
+  
+  observeEvent(input$compare_variant_dist_next, 
+               {updateNavlistPanel(session, "Compare", "summaries_dist")}
+  )
+  
+  observeEvent(input$compare_summ_dist_previous, 
+               {updateNavlistPanel(session, "Compare", "variants_dist")}
+  )
+  
+  observeEvent(input$compare_summ_dist_next, 
+               {updateNavlistPanel(session, "Compare", "download_summaries")}
+  )
+  
+  observeEvent(input$compare_download_summ_previous, 
+               {updateNavlistPanel(session, "Compare", "summaries_dist")}
+  )
+  
+  observeEvent(input$compare_download_summ_next, 
+               {updateNavlistPanel(session, "Compare", "download_variants")}
+  )
+  
+  observeEvent(input$compare_download_vars_previous, 
+               {updateNavlistPanel(session, "Compare", "download_summaries")}
+  )
+  
+  observeEvent(input$compare_download_vars_next, 
+               {updateNavbarPage(session, "navbar", "Home")}
+  )
+  
+  
+  ################################
+  
+  # Dynamically update plot titles wherever necessary
+  # Update plot titles dynamically wherever necessary
+  observe({
+    # Summary tab plots
+    updateTextInput(session, "overall_summary_plot_title", value = paste(input$overall_summary_variant_type, "summary"))
+    updateTextInput(session, "summary_stat_dist_plot_title", value = paste(input$summary_stat_dist_variable, "distribution"))
+    updateTextInput(session, "summary_comp_plot_title", value = paste(input$summary_comp_variable_1, "vs", input$summary_comp_variable_2))
+    
+    # Compare tab plots
+    updateTextInput(session, "variant_comp_set_overall_summary_plot_title", value = paste(input$variant_comp_set_overall_summary, input$variant_comp_set_overall_summary_type, "summary"))
+    updateTextInput(session, "variant_comp_set_dist_plot_title", value = paste(input$variant_comp_set, "distribution"))
+    updateTextInput(session, "variant_comp_set_summary_stat_dist_plot_title", value = paste(input$variant_comp_set_summary ,input$variant_comp_set_summary_stat_dist_variable, "distribution"))
   })
   
   ##############################

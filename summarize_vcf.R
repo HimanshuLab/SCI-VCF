@@ -131,6 +131,8 @@ summarize_vcf <- function(vcf_file, break_multiallelic_sites = TRUE, remove_dupl
 
 
 transpose_summary <- function(vcf_summary){
+  #Function to give the 1st output of summary function as a structured df
+  
   df_2 <- as.data.frame(t(vcf_summary))
   df_2$Contig <- rownames(t(vcf_summary))
   df_2 <- df_2[,c("Contig", "All_Variants", "SNPs" , "INDELs", "MNPs", "Assorted_Variants", "Multiallelic_Sites",
@@ -141,7 +143,18 @@ transpose_summary <- function(vcf_summary){
 }
 
 
-
+indel_size_summary <- function(indel_sizes){
+  # Function to return summaries of insertions and deletions based on size
+  insertion_sizes <- indel_sizes[indel_sizes > 0]
+  deletion_sizes <- indel_sizes[indel_sizes < 0]
+  insertion_summary <- summary(insertion_sizes) 
+  deletion_summary <- summary(deletion_sizes)
+  indel_summary <- rbind(c("Insertion", insertion_summary["Min."], round(insertion_summary["Mean"],2), insertion_summary["Median"], insertion_summary["Max."]),
+                             c("Deletion", deletion_summary["Min."], round(deletion_summary["Mean"],2), deletion_summary["Median"], deletion_summary["Max."]))
+  colnames(indel_summary) <- c("Type", "Minimum", "Mean", "Median", "Maximum")
+  rm(insertion_sizes, deletion_sizes, insertion_summary, deletion_summary)
+  return(indel_summary)
+}
 
 
 ## Check the function
@@ -158,13 +171,12 @@ transpose_summary <- function(vcf_summary){
 #   }
 # }
 # 
-# vcf_file_1 <- read.vcfR("/Users/venkateshk/Desktop/Bioinformatics/sum_vcf_local/vcf_files/HG002_GRCh38_1_22_v4.2.1_benchmark.vcf.gz", verbose = F)
+# vcf_file_1 <- read.vcfR("/Users/venkateshk/Desktop/Bioinformatics/sci-vcf_development/vcf_files/HG002_subset.vcf.gz", verbose = F)
 # vcf_file_2 <- read.vcfR("/Users/venkateshk/Desktop/Bioinformatics/sum_vcf_local/vcf_files/saccharomyces_cerevisiae.vcf.gz", verbose = F)
 # 
 # vcf_summary_1 <- summarize_vcf(vcf_file_1@fix)
 # 
 # t_summary <- transpose_summary(vcf_summaries[1][[1]])
 # hist(vcf_summaries[2][[1]][vcf_summaries[2][[1]] != 0], breaks = 1000)
-# summary(vcf_summaries[2][[1]][vcf_summaries[2][[1]] != 0])
-# 
-# 
+# s <- summary(vcf_summary_1[2][[1]][vcf_summary_1[2][[1]] != 0])
+# ss <- indel_size_summary(vcf_summary_1[2][[1]])

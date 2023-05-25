@@ -29,8 +29,8 @@ ui <- navbarPage("SCI-VCF",
           fluidRow(
             column(3, p("To know more about SCI-VCF:")),
             column(3, actionButton("open_doc", icon = icon("book"), label = "User Guide", width = 150)),
-            column(3, p("To view source code / Get support:")),
-            column(3, actionButton("open_doc", icon = icon("github"), label = "Github", width = 150, onclick ="window.open('https://github.com/venkatk89/', '_blank')")),
+            column(3, p("Contact developers / Get support:")),
+            column(3, actionButton("open_contact", icon = icon("address-card"), label = "Contact", width = 150)),
           ),
           linebreaks(3),
           htmlOutput("upload_size_warning")
@@ -41,7 +41,7 @@ ui <- navbarPage("SCI-VCF",
            navlistPanel(
              
              #Upload VCF panel; show a sneek peek
-             tabPanel("Upload VCF",
+             tabPanel("Upload VCF", value = "upload_vcf",
                       h3("Summarize your VCF file."),
                       p("Upload a file to start the summarization process. Both compressed (.vcf.gz) and uncompressed (.vcf) files are permitted."),
                       linebreaks(2),
@@ -53,26 +53,31 @@ ui <- navbarPage("SCI-VCF",
                       # print wait message here
                       textOutput("wait_message_1"),
                       withLoader(htmlOutput("wait_message_2"), type = "html", loader = "dnaspin"),
+                      linebreaks(3),
+                      fluidRow(
+                        column(2, actionButton("summarize_upload_file_previous", icon = icon("home"), label = "Home", width = 100)),
+                        column(8, hr()),
+                        column(2, actionButton("summarize_upload_file_next", icon = icon("circle-chevron-right"), label = "Next", width = 100))
+                      )
+                      
              ),
              
              
              
              # Definition of Basic summary panel
-             tabPanel("Basic Summary",
+             tabPanel("Overall Summary", value = "overall_summary",
                       # print basic info about vcf file
                       h3("Basic Information about the uploaded VCF file"),
                       fluidRow(
-                       column(6, textOutput("no_of_contigs")),
-                        column(6, textOutput("no_of_samples")),
+                       column(4, withLoader(textOutput("no_of_contigs"), type = "html", loader = "dnaspin")),
+                       column(4, textOutput("no_of_samples")),
+                       column(4, textOutput("filter_column_entries")),
                       ),
                       br(),
-                      withLoader(textOutput("filter_column_entries"), type = "html", loader = "dnaspin"),
-                      br(),
-                      textOutput("no_of_entries"),
-                      br(),
                       fluidRow(
-                        column(6, textOutput("no_of_comma_entries")),
-                        column(6, textOutput("no_of_duplicated_entries"))
+                        column(4,textOutput("no_of_entries")),
+                        column(4, textOutput("no_of_comma_entries")),
+                        column(4, textOutput("no_of_duplicated_entries"))
                       ),
                       linebreaks(2),
                       htmlOutput("processing_note_message"),
@@ -94,9 +99,8 @@ ui <- navbarPage("SCI-VCF",
                       ),
                       br(),
                       h4("Insertions and Deletions"),
-                      textOutput("no_of_indels"),
-                      br(),
                       fluidRow(
+                        column(4,textOutput("no_of_indels")),
                         column(4, textOutput("no_of_insertions")),
                         column(4, textOutput("no_of_deletions"))
                       ),
@@ -104,16 +108,34 @@ ui <- navbarPage("SCI-VCF",
                       h4("Miscellaneous"),
                       fluidRow(
                         column(4, textOutput("no_of_mnps")),
-                        column(4, textOutput("no_of_assorteds"))
+                        column(4, textOutput("no_of_assorteds")),
+                        column(4, textOutput("no_of_multiallelics"))
                       ),
                       br(),
-                      textOutput("no_of_multiallelics"),
+                      linebreaks(3),
+                      h5("Interactive Visualization"),
+                      p("Pick a variant type to plot its overall summary. Use mouse click/hover to interact with the plot."),
+                      br(),
+                      fluidRow(
+                        column(4, selectizeInput("overall_summary_variant_type", "Select variant type",
+                                                 choices = c("All Variants", "SNPs", "INDELs"), selected = "All Variants")),
+                        column(4, textInput("overall_summary_plot_title", "Enter plot title", value = "Variant Summary"))
+                      ),
+                      br(),
+                      withLoader(plotlyOutput("variants_overall_summary"), type = "html", loader = "dnaspin"),
+                      linebreaks(3),
+                      fluidRow(
+                        column(2, actionButton("summarize_basic_previous", icon = icon("circle-chevron-left"), label = "Previous", width = 100)),
+                        column(8, hr()),
+                        column(2, actionButton("summarize_basic_next", icon = icon("circle-chevron-right"), label = "Next", width = 100))
+                      )
+                      
              ),
              
              
              
              # Contig level variant distribution plot
-             tabPanel("Variant Distribution",
+             tabPanel("Variant Distribution", value = "variant_dist",
                       h4("Distribution of all variants in individual contigs"),
                       br(),
                       h5("Customization zone"),
@@ -121,24 +143,31 @@ ui <- navbarPage("SCI-VCF",
                         Changes made in this zone will be reflected in the plot in real time."),
                       # Get inputs for variant contig distribution plot customization
                       fluidRow(
-                        column(6, textInput("variant_contig_dist_plot_title", "Plot Title", value = "Variant Distribution")),
-                        column(6, textInput("variant_contig_dist_fill_colour", "Colour", value = "indianred"))
+                        column(6, textInput("variant_contig_dist_plot_title", "Enter plot title", value = "Variant Distribution")),
+                        column(6, colourInput("variant_contig_dist_fill_colour", "Select colour", value = "indianred", allowTransparent = TRUE, returnName = TRUE))
                       ),
                       fluidRow(
-                        column(6, textInput("variant_contig_dist_x_label", "X label", value = "Position")),
-                        column(6, textInput("variant_contig_dist_y_label", "Y label", value = " Count"))
+                        column(6, textInput("variant_contig_dist_x_label", "Enter X label", value = "Position")),
+                        column(6, textInput("variant_contig_dist_y_label", "Enter Y label", value = " Count"))
                       ),
                       br(),
                       h5("Interactive Visualization"),
                       p("Chromosomes can be selected in the slider below. Use mouse click/hover to interact with the plot."),
                       br(),
                       withLoader(plotlyOutput("variant_dist_in_contig"), type = "html", loader = "dnaspin"),
+                      linebreaks(3),
+                      fluidRow(
+                        column(2, actionButton("summarize_var_dist_previous", icon = icon("circle-chevron-left"), label = "Previous", width = 100)),
+                        column(8, hr()),
+                        column(2, actionButton("summarize_var_dist_next", icon = icon("circle-chevron-right"), label = "Next", width = 100))
+                      )
              ),
              
              
              
+             
              # Render the snp type plot
-             tabPanel("SNP Distribution",
+             tabPanel("SNP Distribution", value = "snp_dist",
                       h4("Distribution of Single Nucleotide Polymorphisms"),
                       br(),
                       h5("Customization zone"),
@@ -146,24 +175,30 @@ ui <- navbarPage("SCI-VCF",
                         Changes made in this zone will be reflected in the plot in real time."),
                       # Get inputs for snp-type plot customization
                       fluidRow(
-                        column(6, textInput("snp_type_plot_title", "Plot Title", value = "SNP Distribution")),
-                        column(6, textInput("snp_type_fill_colour", "Colour", value = "#FFDEAD"))
+                        column(6, textInput("snp_type_plot_title", "Enter plot title", value = "SNP Distribution")),
+                        column(6, colourInput("snp_type_fill_colour", "Select colour", value = "#FFDEAD", allowTransparent = TRUE, returnName = TRUE))
                       ),
                       fluidRow(
-                        column(6, textInput("snp_type_x_label", "X label", value = "SNP type")),
-                        column(6, textInput("snp_type_y_label", "Y label", value = " Count"))
+                        column(6, textInput("snp_type_x_label", "Enter X label", value = "SNP type")),
+                        column(6, textInput("snp_type_y_label", "Enter Y label", value = " Count"))
                       ),
                       br(),
                       h5("Interactive Visualization"),
                       p("Use mouse click/hover to interact with the plot."),
                       br(),
                       withLoader(plotlyOutput("snp_type_in_all_contigs"), type = "html", loader = "dnaspin"),
+                      linebreaks(3),
+                      fluidRow(
+                        column(2, actionButton("summarize_snp_dist_previous", icon = icon("circle-chevron-left"), label = "Previous", width = 100)),
+                        column(8, hr()),
+                        column(2, actionButton("summarize_snp_dist_next", icon = icon("circle-chevron-right"), label = "Next", width = 100))
+                      )
              ),
              
              
              
              # Render the INDEL size distribution plot
-             tabPanel("INDEL Distribution",
+             tabPanel("INDEL Distribution", value = "indel_dist",
                       h4("Size distribution of INDELs"),
                       br(),
                       h5("Customization zone"),
@@ -171,25 +206,33 @@ ui <- navbarPage("SCI-VCF",
                         Changes made in this zone will be reflected in the plot in real time."),
                       # Get inputs for snp-type plot customization
                       fluidRow(
-                        column(4, textInput("indel_size_plot_title", "Plot Title", value = "INDELs Distribution")),
-                        column(4, textInput("indel_size_x_label", "X label", value = "INDEL size")),
-                        column(4, textInput("indel_size_y_label", "Y label", value = " Count"))
+                        column(4, textInput("indel_size_plot_title", "Enter plot title", value = "INDELs Distribution")),
+                        column(4, textInput("indel_size_x_label", "Enter X label", value = "INDEL size")),
+                        column(4, textInput("indel_size_y_label", "Enter Y label", value = " Count"))
                       ),
                       fluidRow(
-                        column(4, textInput("insertion_fill_colour", "Insertion Colour", value = "aquamarine")),
-                        column(4, textInput("deletion_fill_colour", "Deletion Colour", value = "#FFBBFF"))
+                        column(4, colourInput("insertion_fill_colour", "Select insertion colour", value = "aquamarine", allowTransparent = TRUE, returnName = TRUE)),
+                        column(4, colourInput("deletion_fill_colour", "Select deletion colour", value = "#FFBBFF", allowTransparent = TRUE))
                       ),
                       br(),
                       h5("Interactive Visualization"),
                       p("Use the (+)/(-) buttons in the plot area to zoom. Interact with the plot using mouse click/hover."),
                       br(),
                       withLoader(plotlyOutput("indel_size_in_all_contigs"), type = "html", loader = "dnaspin"),
+                      br(),
+                      tableOutput("indel_size_in_all_contigs_summary"),
+                      linebreaks(3),
+                      fluidRow(
+                        column(2, actionButton("summarize_indel_dist_previous", icon = icon("circle-chevron-left"), label = "Previous", width = 100)),
+                        column(8, hr()),
+                        column(2, actionButton("summarize_indel_dist_next", icon = icon("circle-chevron-right"), label = "Next", width = 100))
+                      )
              ),
              
              
              
              # Contig level summary distribution plot
-             tabPanel("Summary Distribution",
+             tabPanel("Summary Distribution", value = "summary_stat_dist",
                       h4("Distribution of summary statistics"),
                       br(),
                       h5("Customization zone"),
@@ -199,31 +242,37 @@ ui <- navbarPage("SCI-VCF",
                       # Get inputs for variant contig distribution plot customization
                       fluidRow(
                         
-                        column(4, selectInput("summary_stat_dist_variable", "Summary Statistic",
+                        column(4, selectInput("summary_stat_dist_variable", "Select summary statistic",
                                               choices = c("All_Variants", "SNPs" , "INDELs", "MNPs", "Assorted_Variants", "Multiallelic_Sites",
                                                           "Insertions", "Deletions", "Transitions", "Transversions",
                                                           "A_to_C", "A_to_G", "A_to_T", "C_to_A", "C_to_G", "C_to_T",
                                                           "G_to_A", "G_to_C", "G_to_T", "T_to_A", "T_to_C", "T_to_G"),
                                               selected  = "SNPs")),
-                        column(4, selectInput("summary_stat_dist_plot_type", "Plot Type", choices = c("Line", "Bar"),selected  = "Bar")),
-                        column(4, textInput("summary_stat_dist_colour", "Colour", value = "#8B3A62"))
+                        column(4, selectInput("summary_stat_dist_plot_type", "Enter plot type", choices = c("Line", "Bar"),selected  = "Bar")),
+                        column(4, colourInput("summary_stat_dist_colour", "Select colour", value = "#8B3A62", allowTransparent = TRUE))
                       ),
                       fluidRow(
-                        column(4, textInput("summary_stat_dist_plot_title", "Plot Title", value = "Summary Statistics Distribution")),
-                        column(4, textInput("summary_stat_dist_x_label", "X label", value = "Chromosome")),
-                        column(4, textInput("summary_stat_dist_y_label", "Y label", value = " Value"))
+                        column(4, textInput("summary_stat_dist_plot_title", "Enter plot title", value = "Summary Statistics Distribution")),
+                        column(4, textInput("summary_stat_dist_x_label", "Enter X label", value = "Chromosome")),
+                        column(4, textInput("summary_stat_dist_y_label", "Enter Y label", value = " Value"))
                       ),
                       br(),
                       h5("Interactive Visualization"),
                       p("Post customization, you can also download a static image of the plot. Use mouse click/hover to interact with the plot."),
                       br(),
                       withLoader(plotlyOutput("summary_stat_dist_in_contig"), type = "html", loader = "dnaspin"),
+                      linebreaks(3),
+                      fluidRow(
+                        column(2, actionButton("summarize_sum_dist_previous", icon = icon("circle-chevron-left"), label = "Previous", width = 100)),
+                        column(8, hr()),
+                        column(2, actionButton("summarize_sum_dist_next", icon = icon("circle-chevron-right"), label = "Next", width = 100))
+                      )
              ),
              
              
              
              # Contig level summary Comparison plot
-             tabPanel("Summary Comparison",
+             tabPanel("Summary Comparison", value = "summary_comp_dist",
                       h4("Comparison of summary statistics"),
                       br(),
                       h5("Customization zone"),
@@ -232,39 +281,45 @@ ui <- navbarPage("SCI-VCF",
                       p("Pick two summary statistics to compare their distribution w.r.t. the contigs"),
                       # Get inputs for variant contig distribution plot customization
                       fluidRow(
-                        column(3, selectInput("summary_comp_variable_1", "Summary Statistic 1",
+                        column(3, selectInput("summary_comp_variable_1", "Select summary statistic 1",
                                               choices = c("All_Variants", "SNPs" , "INDELs", "MNPs", "Assorted_Variants", "Multiallelic_Sites",
                                                           "Insertions", "Deletions", "Transitions", "Transversions",
                                                           "A_to_C", "A_to_G", "A_to_T", "C_to_A", "C_to_G", "C_to_T",
                                                           "G_to_A", "G_to_C", "G_to_T", "T_to_A", "T_to_C", "T_to_G"),
                                               selected  = "Transitions")),
-                        column(3, textInput("summary_comp_colour_1", "Colour 1", value = "coral1")),
+                        column(3, colourInput("summary_comp_colour_1", "Colour 1", value = "coral1", allowTransparent = TRUE)),
                         
-                        column(3, selectInput("summary_comp_variable_2", "Summary Statistic 2",
+                        column(3, selectInput("summary_comp_variable_2", "Select summary statistic 2",
                                               choices = c("All_Variants", "SNPs" , "INDELs", "MNPs", "Assorted_Variants", "Multiallelic_Sites",
                                                           "Insertions", "Deletions", "Transitions", "Transversions",
                                                           "A_to_C", "A_to_G", "A_to_T", "C_to_A", "C_to_G", "C_to_T",
                                                           "G_to_A", "G_to_C", "G_to_T", "T_to_A", "T_to_C", "T_to_G"),
                                               selected  = "Transversions")),
-                        column(3, textInput("summary_comp_colour_2", "Colour 2", value = "cornflowerblue"))
+                        column(3, colourInput("summary_comp_colour_2", "Select colour 2", value = "cornflowerblue", allowTransparent = TRUE, returnName = TRUE))
                       ),
                       fluidRow(
-                        column(3, selectInput("summary_comp_plot_type", "Plot Type", choices = c("Line", "Bar"),selected  = "Bar")),
-                        column(3, textInput("summary_comp_plot_title", "Plot Title", value = "Summary Statistics Comparison")),
-                        column(3, textInput("summary_comp_x_label", "X label", value = "Chromosome")),
-                        column(3, textInput("summary_comp_y_label", "Y label", value = " Value"))
+                        column(3, selectInput("summary_comp_plot_type", "Select plot type", choices = c("Line", "Bar"),selected  = "Bar")),
+                        column(3, textInput("summary_comp_plot_title", "Enter plot title", value = "Summary Statistics Comparison")),
+                        column(3, textInput("summary_comp_x_label", "Enter X label", value = "Chromosome")),
+                        column(3, textInput("summary_comp_y_label", "Enter Y label", value = " Value"))
                       ),
                       br(),
                       h5("Interactive Visualization"),
                       p("Use mouse click/hover to interact with the plot."),
                       br(),
                       withLoader(plotlyOutput("summary_comp_in_contig"), type = "html", loader = "dnaspin"),
+                      linebreaks(3),
+                      fluidRow(
+                        column(2, actionButton("summarize_sum_comp_previous", icon = icon("circle-chevron-left"), label = "Previous", width = 100)),
+                        column(8, hr()),
+                        column(2, actionButton("summarize_sum_comp_next", icon = icon("circle-chevron-right"), label = "Next", width = 100))
+                      )
              ),
              
              
              
              # Delve deeper
-             tabPanel("Download Summary",
+             tabPanel("Download Summary", value = "download_summary",
                       h3("Delve Deeper"),
                       withLoader(textOutput("download_summary_message"), type = "html", loader = "dnaspin"),
                       br(),
@@ -272,11 +327,17 @@ ui <- navbarPage("SCI-VCF",
                       downloadButton("download_summary_statistics", "Download .csv"),
                       
                       linebreaks(5),
-                      textOutput("venkatesh_signing_off")
+                      textOutput("venkatesh_signing_off"),
+                      linebreaks(3),
+                      fluidRow(
+                        column(2, actionButton("summarize_download_list_previous", icon = icon("circle-chevron-left"), label = "Previous", width = 100)),
+                        column(8, hr()),
+                        column(2, actionButton("summarize_download_list_next", icon = icon("home"), label = "Home", width = 100))
+                      )
              ),
              
              
-             
+             id = "Summarize",
              widths = c(3, 9)
            ) # End of summarize navigation panel
            
@@ -287,7 +348,7 @@ ui <- navbarPage("SCI-VCF",
            navlistPanel(
              
              #Upload VCF panel; show a sneek peek
-             tabPanel("Upload VCFs",
+             tabPanel("Upload VCFs", value = "upload_vcfs",
                       h3("Compare your VCF files"),
                       p("Upload File no. 1 and File no. 2 to start the comparison process. 
                         Both compressed (.vcf.gz) and uncompressed (.vcf) files are permitted."),
@@ -304,12 +365,18 @@ ui <- navbarPage("SCI-VCF",
                       # print wait message here
                       textOutput("wait_message_compare_1"),
                       withLoader(htmlOutput("wait_message_compare_2"), type = "html", loader = "dnaspin"),
+                      linebreaks(3),
+                      fluidRow(
+                        column(2, actionButton("compare_upload_vcfs_previous", icon = icon("home"), label = "Home", width = 100)),
+                        column(8, hr()),
+                        column(2, actionButton("compare_upload_vcfs_next", icon = icon("circle-chevron-right"), label = "Next", width = 100))
+                      )
                       ),
              
              
              
              # Venn Diagram
-             tabPanel("Venn Diagram",
+             tabPanel("Venn Diagram", value = "venn_diagram",
                       h4("Venn Diagram of variants"),
                       br(),
                       h5("Customization zone"),
@@ -319,7 +386,7 @@ ui <- navbarPage("SCI-VCF",
                       # Get inputs for variant contig distribution plot customization
                       fluidRow(
                         
-                        column(6, selectInput("venn_summary_stat", "Summary Statistic",
+                        column(6, selectInput("venn_summary_stat", "Select summary statistic",
                                               choices = c("All_Variants", "SNPs" , "INDELs", "Insertions", "Deletions", "Transitions", "Transversions",
                                                           "MNPs", "Assorted_Variants", "Multiallelic_Sites",
                                                           "A_to_C", "A_to_G", "A_to_T", "C_to_A", "C_to_G", "C_to_T",
@@ -327,31 +394,61 @@ ui <- navbarPage("SCI-VCF",
                                               selected  = "All_Variants"))
                       ),
                       fluidRow(
-                        column(4, textInput("venn_file_1_label", "File no. 1 label", value = "File 1")),
-                        column(4, textInput("venn_color_1", "Colour 1", value = "red"))
+                        column(4, textInput("venn_file_1_label", "Enter file no. 1 label", value = "File 1")),
+                        column(4, colourInput("venn_color_1", "Colour 1", value = "#EE5C42", allowTransparent = TRUE, returnName = TRUE))
                       ),
                       fluidRow(
-                        column(4, textInput("venn_file_2_label", "File no. 2 label", value = "File 2")),
-                        column(4, textInput("venn_color_2", "Color 2", value = "yellow"))
+                        column(4, textInput("venn_file_2_label", "Enter file no. 2 label", value = "File 2")),
+                        column(4, colourInput("venn_color_2", "Color 2", value = "#FFFACD", allowTransparent = TRUE, returnName = TRUE))
                       ),
                       br(),
                       h5("Visualization"),
                       br(),
                       withLoader(plotOutput("venn_diagram_comparison"), type = "html", loader = "dnaspin"),
-                      
+                      linebreaks(3),
+                      fluidRow(
+                        column(2, actionButton("compare_venn_diagram_previous", icon = icon("circle-chevron-left"), label = "Previous", width = 100)),
+                        column(8, hr()),
+                        column(2, actionButton("compare_venn_diagram_next", icon = icon("circle-chevron-right"), label = "Next", width = 100))
+                      )
                       ),
              
              
              
              #Basic Summary
-             tabPanel("Basic Summaries",
-                      h3("Hi!")
+             tabPanel("Overall Summaries", value = "overall_summaries",
+                      h4("Distribution of summary statistics"),
+                      br(),
+                      h5("Customization zone"),
+                      p("You can edit the following parameters to customize the plots. 
+                        Changes made in this zone will be reflected in the plot in real time."),
+                      p("Pick a variant set and a variant type to get its overall summary."),
+                      # Get inputs for variant contig distribution plot customization
+                      fluidRow(
+                        column(4, selectizeInput("variant_comp_set_overall_summary", "Select a variants set", 
+                                                 choices = c("Variants private to File 1", "Variants private to File 2", "Variants present in both files"),
+                                                 selected = "Variants present in both files")),
+                        column(4, selectizeInput("variant_comp_set_overall_summary_type", "Select variant type",
+                               choices = c("All Variants", "SNPs", "INDELs"), selected = "All Variants")),
+                        column(4, textInput("variant_comp_set_overall_summary_plot_title", "Enter plot title", value = "Basic Summary"))
+                      ),
+                      br(),
+                      h5("Interactive Visualization"),
+                      p("Use mouse click/hover to interact with the plot."),
+                      br(),
+                      withLoader(plotlyOutput("variant_com_set_overall_summary"), type = "html", loader = "dnaspin"),
+                      linebreaks(3),
+                      fluidRow(
+                        column(2, actionButton("compare_overall_summary_previous", icon = icon("circle-chevron-left"), label = "Previous", width = 100)),
+                        column(8, hr()),
+                        column(2, actionButton("compare_overall_summary_next", icon = icon("circle-chevron-right"), label = "Next", width = 100))
+                      )
                       ),
              
              
              
              #Variant Distribution
-             tabPanel("Variants Distribution",
+             tabPanel("Variants Distribution", value = "variants_dist",
                       h4("Distribution of all variants in each variant set"),
                       br(),
                       h5("Customization zone"),
@@ -362,25 +459,31 @@ ui <- navbarPage("SCI-VCF",
                                      selected = "Variants present in both files"),
                       # Get inputs for variant contig distribution plot customization
                       fluidRow(
-                        column(6, textInput("variant_comp_set_dist_plot_title", "Plot Title", value = "Variant Distribution")),
-                        column(6, textInput("variant_comp_set_dist_fill_colour", "Colour", value = "indianred"))
+                        column(6, textInput("variant_comp_set_dist_plot_title", "Enter plot Title", value = "Variant Distribution")),
+                        column(6, colourInput("variant_comp_set_dist_fill_colour", "Select colour", value = "#7FFF00", allowTransparent = TRUE, returnName = TRUE))
                       ),
                       fluidRow(
-                        column(6, textInput("variant_comp_set_dist_x_label", "X label", value = "Position")),
-                        column(6, textInput("variant_comp_set_dist_y_label", "Y label", value = " Count"))
+                        column(6, textInput("variant_comp_set_dist_x_label", "Enter X label", value = "Position")),
+                        column(6, textInput("variant_comp_set_dist_y_label", "Enter Y label", value = " Count"))
                       ),
                       br(),
                       h5("Interactive Visualization"),
                       p("Chromosomes can be selected in the slider below. Use mouse click/hover to interact with the plot."),
                       br(),
                       withLoader(plotlyOutput("variant_comp_set_dist_in_contig"), type = "html", loader = "dnaspin"),
+                      linebreaks(3),
+                      fluidRow(
+                        column(2, actionButton("compare_variant_dist_previous", icon = icon("circle-chevron-left"), label = "Previous", width = 100)),
+                        column(8, hr()),
+                        column(2, actionButton("compare_variant_dist_next", icon = icon("circle-chevron-right"), label = "Next", width = 100))
+                      )
                       ),
              
              
              
              #Summary Distribution
              tabPanel("Summary Distribution",
-                      h4("Distribution of summary statistics"),
+                      h4("Distribution of summary statistics"), value = "summaries_dist",
                       br(),
                       h5("Customization zone"),
                       p("You can edit the following parameters to customize the plot. 
@@ -388,10 +491,10 @@ ui <- navbarPage("SCI-VCF",
                       p("Pick a variant set and a summary statistic to view its distribution w.r.t. the contigs"),
                       # Get inputs for variant contig distribution plot customization
                       fluidRow(
-                        column(4, selectizeInput("variant_comp_set_summary", "Variants Set", 
+                        column(4, selectizeInput("variant_comp_set_summary", "Select variants set", 
                                        choices = c("Variants private to File 1", "Variants private to File 2", "Variants present in both files"),
                                        selected = "Variants present in both files")),
-                        column(4, selectInput("variant_comp_set_summary_stat_dist_variable", "Summary Statistic",
+                        column(4, selectInput("variant_comp_set_summary_stat_dist_variable", "Select summary statistic",
                                               choices = c("All_Variants", "SNPs" , "INDELs", "MNPs", "Assorted_Variants", "Multiallelic_Sites",
                                                           "Insertions", "Deletions", "Transitions", "Transversions",
                                                           "A_to_C", "A_to_G", "A_to_T", "C_to_A", "C_to_G", "C_to_T",
@@ -399,25 +502,31 @@ ui <- navbarPage("SCI-VCF",
                                               selected  = "SNPs")),
                       ),
                       fluidRow(
-                        column(4, selectInput("variant_comp_set_summary_stat_dist_plot_type", "Plot Type", choices = c("Line", "Bar"),selected  = "Bar")),
-                        column(4, textInput("variant_comp_set_summary_stat_dist_colour", "Colour", value = "#8B3A62"))
+                        column(4, selectInput("variant_comp_set_summary_stat_dist_plot_type", "Select plot type", choices = c("Line", "Bar"),selected  = "Bar")),
+                        column(4, colourInput("variant_comp_set_summary_stat_dist_colour", "Select colour", value = "steelblue2", allowTransparent = TRUE, returnName = TRUE))
                       ),
                       fluidRow(
-                        column(4, textInput("variant_comp_set_summary_stat_dist_plot_title", "Plot Title", value = "Summary Statistics Distribution")),
-                        column(4, textInput("variant_comp_set_summary_stat_dist_x_label", "X label", value = "Chromosome")),
-                        column(4, textInput("variant_comp_set_summary_stat_dist_y_label", "Y label", value = " Value"))
+                        column(4, textInput("variant_comp_set_summary_stat_dist_plot_title", "Enter plot title", value = "Summary Statistics Distribution")),
+                        column(4, textInput("variant_comp_set_summary_stat_dist_x_label", "Enter X label", value = "Chromosome")),
+                        column(4, textInput("variant_comp_set_summary_stat_dist_y_label", "Enter Y label", value = " Value"))
                       ),
                       br(),
                       h5("Interactive Visualization"),
                       p("Post customization, you can also download a static image of the plot. Use mouse click/hover to interact with the plot."),
                       br(),
                       withLoader(plotlyOutput("variant_com_set_summary_stat_dist"), type = "html", loader = "dnaspin"),
+                      linebreaks(3),
+                      fluidRow(
+                        column(2, actionButton("compare_summ_dist_previous", icon = icon("circle-chevron-left"), label = "Previous", width = 100)),
+                        column(8, hr()),
+                        column(2, actionButton("compare_summ_dist_next", icon = icon("circle-chevron-right"), label = "Next", width = 100))
+                      )
              ),
              
              
              
              # Download Summaries
-             tabPanel("Download Summaries",
+             tabPanel("Download Summaries", value = "download_summaries",
                       h3("Delve Deep"),
                       withLoader(textOutput("download_com_sum_message"), type = "html", loader = "dnaspin"),
                       br(),
@@ -436,13 +545,19 @@ ui <- navbarPage("SCI-VCF",
                         column(6, textInput("download_summary_both_filename", "File Name", value = "Both_Summary_Statistics")),
                         column(6, downloadButton("download_com_sum_both", "Download .csv"))
                       ),
+                      linebreaks(3),
+                      fluidRow(
+                        column(2, actionButton("compare_download_summ_previous", icon = icon("circle-chevron-left"), label = "Previous", width = 100)),
+                        column(8, hr()),
+                        column(2, actionButton("compare_download_summ_next", icon = icon("circle-chevron-right"), label = "Next", width = 100))
+                      ),
                       linebreaks(5)
              ),
              
              
              
              # Download Variant list
-             tabPanel("Download Variants",
+             tabPanel("Download Variants", value = "download_variants",
                       h3("Delve Deeper"),
                       withLoader(textOutput("download_com_var_message"), type = "html", loader = "dnaspin"),
                       br(),
@@ -467,11 +582,17 @@ ui <- navbarPage("SCI-VCF",
                         column(6, downloadButton("download_com_var_right_and_left", "Download .csv"))
                       ),
                       linebreaks(5),
-                      textOutput("venkatesh_signing_off_again")
+                      textOutput("venkatesh_signing_off_again"),
+                      linebreaks(3),
+                      fluidRow(
+                        column(2, actionButton("compare_download_vars_previous", icon = icon("circle-chevron-left"), label = "Previous", width = 100)),
+                        column(8, hr()),
+                        column(2, actionButton("compare_download_vars_next", icon = icon("home"), label = "Home", width = 100))
+                      )
                       ),
              
              
-             
+             id = "Compare",
              widths = c(3, 9)
             )# End of Navigation panel for Compare
            
@@ -482,6 +603,11 @@ ui <- navbarPage("SCI-VCF",
            h3("Docs")
   ), # End of User guide panel
   
+  tabPanel("Contact",
+           h3("About"),
+           h4("Email"),
+           h4("Github")
+  ), # End of Contact panel
   
   id = "navbar",
   footer = htmlOutput("footer_message")

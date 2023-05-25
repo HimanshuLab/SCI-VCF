@@ -2,12 +2,12 @@
 
 ----
 
-SumVCF can be used in multiple ways!
+SCI-VCF can be used in multiple ways!
 
-## 1. Use SumVCF online
-> Note: Online version of SumVCF comes with certain upload size limitations. To get the full functionalities of SumVCF, use a local/server installation of the tool.
+## 1. Use SCI-VCF online
+> Note: Online version of SCI-VCF comes with certain upload size limitations. To get the full functionalities of SCI-VCF, use a local/server installation of the tool.
 
-#### 1.1.  The online version is hosted at [SumVCF](https://github.com/venkatk89/sum_vcf)
+#### 1.1.  The online version is hosted at [SCI-VCF](https://github.com/venkatk89/sum_vcf)
 
 <br> 
 ## 2. Launch SunVCF using RStudio
@@ -18,7 +18,7 @@ SumVCF can be used in multiple ways!
 
 #### 2.1. Install R and RStudio 
 
-#### 2.2. Get the SumVCF repository from GitHub
+#### 2.2. Get the SCI-VCF repository from GitHub
 You can download the zipped version of the repo at this [link](https://github.com/venkatk89/sum_vcf)
 
 *Insert Image*
@@ -27,7 +27,7 @@ Alternatively, you can use the command line to clone the repo
 
     git clone repo
 
-#### 2.3. Start the SumVCF app
+#### 2.3. Start the SCI-VCF app
 Run the following lines of code in RStudio
     library(shiny)
     runApp("E:/apps/shinyChromosome-master", launch.browser = TRUE)
@@ -36,6 +36,6 @@ Run the following lines of code in RStudio
 
 *Write Stuff here*
 
-## Deploy SumVCF in a server
+## Deploy SCI-VCF in a server
 
 *Write Stuff here*
