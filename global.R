@@ -1,5 +1,8 @@
 # define all required libraries and load them
-required_libraries <- c("here", "vcfR", "ggplot2", "scales", "eulerr" ,"dplyr", "tidyr", "reshape2", "shiny", "plotly", "shinycustomloader", "colourpicker")
+required_libraries <- c("here", "vcfR", "ggplot2", "scales", "eulerr" ,"dplyr", 
+                        "tidyr", "reshape2", "shiny", "shinycustomloader", 
+                        "colourpicker", "plotly")
+
 for (dependency in required_libraries) {
   if(!require(dependency, character.only = TRUE)){
     print("Downloading some dependencies from CRAN")
@@ -20,12 +23,12 @@ options(shiny.maxRequestSize = 1 * 1024^2 * 1024^2)
 
 # Load other modules into app.R
 
-source(here("summarize_vcf.R"))
-source(here("compare_vcf.R"))
-source(here("plot_vcf.R"))
-source(here("server.R"))
-source(here("ui.R"))
+source(here("./R/summarize_vcf.R"))
+source(here("./R/compare_vcf.R"))
+source(here("./R/plot_vcf.R"))
+source(here("./R/server.R"))
+source(here("./R/ui.R"))
 
 
+shinyApp(ui, server)
 
-#shinyApp(ui, server)
