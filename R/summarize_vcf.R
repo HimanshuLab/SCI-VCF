@@ -171,7 +171,12 @@ indel_size_summary <- function(indel_sizes){
 #   }
 # }
 # 
-# vcf_file_1 <- read.vcfR("/Users/venkateshk/Desktop/Bioinformatics/sci-vcf_development/vcf_files/HG002_subset.vcf.gz", verbose = F)
+
+
+# vcf_file_1 <- read.vcfR("/Users/venkateshk/Desktop/Bioinformatics/sci-vcf_development/vcf_files/HG002_subset.vcf.gz")
+# unique(vcf_file_1@fix[,"CHROM"])
+
+
 # vcf_file_2 <- read.vcfR("/Users/venkateshk/Desktop/Bioinformatics/sum_vcf_local/vcf_files/saccharomyces_cerevisiae.vcf.gz", verbose = F)
 # 
 # vcf_summary_1 <- summarize_vcf(vcf_file_1@fix)

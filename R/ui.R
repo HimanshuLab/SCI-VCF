@@ -14,8 +14,8 @@ ui <- navbarPage("SCI-VCF",
            withLoader(htmlOutput("introduction"),type = "html", loader = "dnaspin"),
            fluidRow(
              column(3, p("Download sample VCF files here:")),
-             column(2, actionLink("sample_vcf_1", icon = icon("file"), label = "Sample 1", width = 150)),
-             column(2, actionLink("sample_vcf_2", icon = icon("file"), label = "Sample 2", width = 150))
+             column(2, uiOutput("sample_vcf_1_download")), 
+             column(2, uiOutput("sample_vcf_2_download")) 
            ),
           linebreaks(2),
           h3("Get Started"),
@@ -227,18 +227,21 @@ ui <- navbarPage("SCI-VCF",
                       h5("Customization zone"),
                       p("You can edit the following parameters to customize the plot. 
                         Changes made in this zone will be reflected in the plot in real time."),
+                      p("Pick a chromosome to view the distribution of variants in it. Choose a bin with for the histogram in the slider. "),
                       # Get inputs for variant contig distribution plot customization
                       fluidRow(
-                        column(6, textInput("variant_contig_dist_plot_title", "Enter plot title", value = "Variant Distribution")),
-                        column(6, colourInput("variant_contig_dist_fill_colour", "Select colour", value = "indianred", allowTransparent = TRUE, returnName = TRUE))
+                        column(4, selectInput("variant_contig_dist_contig", "Select contig", choices = "contig_list_from_vcf")),
+                        column(4, selectInput("variant_contig_dist_bin_size", "Select max. bins size", choices = c(25,50,100, 200), selected = 25)),
+                        column(4, colourInput("variant_contig_dist_fill_colour", "Select colour", value = "indianred", allowTransparent = TRUE, returnName = TRUE))
                       ),
                       fluidRow(
-                        column(6, textInput("variant_contig_dist_x_label", "Enter X label", value = "Position")),
-                        column(6, textInput("variant_contig_dist_y_label", "Enter Y label", value = " Count"))
+                        column(4, textInput("variant_contig_dist_plot_title", "Enter plot title", value = "Variant Distribution")),
+                        column(4, textInput("variant_contig_dist_x_label", "Enter X label", value = "Position")),
+                        column(4, textInput("variant_contig_dist_y_label", "Enter Y label", value = " Count"))
                       ),
                       br(),
                       h5("Interactive Visualization"),
-                      p("Chromosomes can be selected in the slider below. Use mouse click/hover to interact with the plot."),
+                      p("Use mouse click/hover to interact with the plot."),
                       br(),
                       withLoader(plotlyOutput("variant_dist_in_contig"), type = "html", loader = "dnaspin"),
                       linebreaks(3),
@@ -390,15 +393,16 @@ ui <- navbarPage("SCI-VCF",
                                                           "MNPs", "Assorted_Variants", "Multiallelic_Sites",
                                                           "A_to_C", "A_to_G", "A_to_T", "C_to_A", "C_to_G", "C_to_T",
                                                           "G_to_A", "G_to_C", "G_to_T", "T_to_A", "T_to_C", "T_to_G"),
-                                              selected  = "All_Variants"))
+                                              selected  = "All_Variants")),
+                        column(6, textInput("venn_title", "Enter plot title", value = "Venn Diagram"))
                       ),
                       fluidRow(
-                        column(4, textInput("venn_file_1_label", "Enter file no. 1 label", value = "File 1")),
-                        column(4, colourInput("venn_color_1", "Colour 1", value = "#EE5C42", allowTransparent = TRUE, returnName = TRUE))
+                        column(6, textInput("venn_file_1_label", "Enter file no. 1 label", value = "File 1")),
+                        column(6, colourInput("venn_color_1", "Colour 1", value = "#EE5C42", allowTransparent = TRUE, returnName = TRUE))
                       ),
                       fluidRow(
-                        column(4, textInput("venn_file_2_label", "Enter file no. 2 label", value = "File 2")),
-                        column(4, colourInput("venn_color_2", "Color 2", value = "#FFFACD", allowTransparent = TRUE, returnName = TRUE))
+                        column(6, textInput("venn_file_2_label", "Enter file no. 2 label", value = "File 2")),
+                        column(6, colourInput("venn_color_2", "Color 2", value = "#FFFACD", allowTransparent = TRUE, returnName = TRUE))
                       ),
                       br(),
                       h5("Visualization"),
@@ -501,17 +505,20 @@ ui <- navbarPage("SCI-VCF",
                                      choices = c("Variants unique to File 1", "Variants unique to File 2", "Variants intersecting in both files"),
                                      selected = "Variants intersecting in both files"),
                       # Get inputs for variant contig distribution plot customization
+                      p("Pick a chromosome to view the distribution of variants in it. Choose a bin with for the histogram in the slider. "),
                       fluidRow(
-                        column(6, textInput("variant_comp_set_dist_plot_title", "Enter plot Title", value = "Variant Distribution")),
-                        column(6, colourInput("variant_comp_set_dist_fill_colour", "Select colour", value = "lightgreen", allowTransparent = TRUE, returnName = TRUE))
+                        column(4, selectInput("variant_comp_set_dist_contig", "Select contig", choices = "contig_list_from_vcf")),
+                        column(4, selectInput("variant_comp_set_dist_bin_size", "Select max. bins size", choices = c(25,50,100, 200), selected = 25)),
+                        column(4, colourInput("variant_comp_set_dist_fill_colour", "Select colour", value = "lightgreen", allowTransparent = TRUE, returnName = TRUE))
                       ),
                       fluidRow(
-                        column(6, textInput("variant_comp_set_dist_x_label", "Enter X label", value = "Position")),
-                        column(6, textInput("variant_comp_set_dist_y_label", "Enter Y label", value = " Count"))
+                        column(4, textInput("variant_comp_set_dist_plot_title", "Enter plot Title", value = "Variant Distribution")),
+                        column(4, textInput("variant_comp_set_dist_x_label", "Enter X label", value = "Position")),
+                        column(4, textInput("variant_comp_set_dist_y_label", "Enter Y label", value = " Count"))
                       ),
                       br(),
                       h5("Interactive Visualization"),
-                      p("Chromosomes can be selected in the slider below. Use mouse click/hover to interact with the plot."),
+                      p("Use mouse click/hover to interact with the plot."),
                       br(),
                       withLoader(plotlyOutput("variant_comp_set_dist_in_contig"), type = "html", loader = "dnaspin"),
                       linebreaks(3),
@@ -598,7 +605,15 @@ ui <- navbarPage("SCI-VCF",
   
   
   tabPanel("Quick Guide",
-           h3("Docs")
+           h3("Docs"),
+           linebreaks(3),
+           fluidRow(
+             column(10, hr()),
+             column(2, actionButton("quick_guide_next", icon = icon("home"), label = "Home", width = 100))
+           ),
+           linebreaks(3),
+           id = "Quick_Guide",
+           widths = c(3, 9)
   ), # End of Quick guide panel
   
   tabPanel("Contact",
@@ -608,22 +623,27 @@ ui <- navbarPage("SCI-VCF",
            br(),
            fluidRow(
              column(3, p("View Source Code / Raise Issues:")),
-             column(3, actionLink("contact_github", label = "Github", icon = icon("github"), width = 150)),
-             column(3, p("Pull Docker Image:")),
-             column(3, actionLink("contact_docker", label = "Docker", icon = icon("docker"), width = 150))
+             column(3, uiOutput("contact_github")),#actionLink("contact_github", label = "Github", icon = icon("github"), width = 150)),
+             column(3, p("View Docker Image:")),
+             column(3, uiOutput("contact_docker")) #actionLink("contact_docker", label = "Docker", icon = icon("docker"), width = 150))
            ),
            br(),
            fluidRow(
              column(3, p("Read Detailed Documentation:")),
-             column(3, actionLink("contact_documentation", label = "Documentation", icon = icon("book"), width = 150)),
+             column(3, uiOutput("contact_documentation")), #actionLink("contact_documentation", label = "Documentation", icon = icon("book"), width = 150)),
              column(3, p("Visit IBSE website:")),
-             column(3, actionLink("contact_ibse", label = "IBSE", icon = icon("building-user"), width = 150))
+             column(3, uiOutput("contact_ibse")) #actionLink("contact_ibse", label = "IBSE", icon = icon("building-user"), width = 150))
            ),
            br(),
            h3("Citation"),
            br(),
            p("..."),
-           linebreaks(5)
+           linebreaks(3),
+           fluidRow(
+             column(10, hr()),
+             column(2, actionButton("contact_next", icon = icon("home"), label = "Home", width = 100))
+           ),
+           linebreaks(3)
            
   ), # End of Contact panel
   

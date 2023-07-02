@@ -2,7 +2,7 @@
 
 
 # Function to create histograms of all_variants in each chromosome
-get_all_variant_distribution <- function(vcf_file,fill_color, plot_title, x_label, y_label) {
+get_all_variant_distribution <- function(vcf_file, selected_contig, selected_bin_size, fill_color, plot_title, x_label, y_label) {
   # vcf_file_subset: Fixed vcfR object
   # All other parameters are for plot customizations
   
@@ -10,14 +10,13 @@ get_all_variant_distribution <- function(vcf_file,fill_color, plot_title, x_labe
   print("Render distribution of variants plot")
   
   vcf_file_subset <- as.data.frame(vcf_file[,c("CHROM", "POS")])
-
+  vcf_file_subset <- vcf_file_subset[vcf_file_subset[,"CHROM"] == selected_contig, ]
   variant_dist_in_contig <- vcf_file_subset %>%
                             mutate(POS = as.integer(POS)) %>%
-                            mutate(CHROM = as.factor(CHROM)) %>%
                               plot_ly(x = ~POS,
                                       type = "histogram", 
                                       marker = list(color = fill_color, line = list(color = 'black', width = 1)),
-                                      frame = ~CHROM) %>%
+                                      nbinsx = selected_bin_size) %>%
                                       layout(title = plot_title,
                                              xaxis = list(title = x_label, showgrid = F, showline= T, linecolor='black', showticklabels = T, ticks="outside"),
                                              yaxis = list(title = y_label, showgrid = F, showline= T, linecolor='black', showticklabels = T, ticks="outside")) %>%
@@ -109,6 +108,7 @@ get_summary_stat_distribution <- function(vcf_sum_table, summary_stat, plot_type
   
   print("Render summary statistic distribution plot")
   df <- vcf_sum_table[(vcf_sum_table$Contig != "All_Contigs"), c("Contig", summary_stat)]
+  df$Contig <- factor(df$Contig, levels = unique(vcf_file_1@fix[,"CHROM"]))
   
   if(plot_type == "Bar"){
     summary_stat_bar_plot <- ggplot(df, aes(x = Contig, y = get(summary_stat)))+
@@ -124,7 +124,7 @@ get_summary_stat_distribution <- function(vcf_sum_table, summary_stat, plot_type
   
   if(plot_type == "Line"){
     summary_stat_bar_plot <- ggplot(df, aes(x=Contig, get(summary_stat)))+
-      geom_line(linetye = "dashed")+
+      geom_line(group = 1, color = col_fill)+
       geom_point(color = col_fill, size = 2)+
       ggtitle(plot_title)+
       xlab(x_label)+
@@ -151,7 +151,7 @@ get_summary_stat_distribution <- function(vcf_sum_table, summary_stat, plot_type
 
 
 
-get_summary_comparison_plot <- function(vcf_sum_table, summary_stat_1, summary_stat_2, col_fill_1, col_fill_2, plot_title, x_label, y_label){
+get_summary_comparison_plot <- function(vcf_sum_table, summary_stat_1, summary_stat_2, col_fill_1, col_fill_2, plot_type, plot_title, x_label, y_label){
   # A function that returns bar plot with comparison of two selected summary statistics
   # Parameters
   # vcf_summary:first entry in the list returned by summarize_vcf function
@@ -159,18 +159,39 @@ get_summary_comparison_plot <- function(vcf_sum_table, summary_stat_1, summary_s
   
   print("Render summary statistic comparison plot")
   df <- vcf_sum_table[(vcf_sum_table$Contig != "All_Contigs"), c("Contig", summary_stat_1, summary_stat_2)]
-  summary_comparison_plot <- df %>%
-                             melt(id = "Contig") %>%
-                             ggplot(aes(x = Contig, y = value, fill = variable)) +
-                             geom_col(position = "dodge", color = "black", width = 0.9)+
-                             ggtitle(plot_title)+
-                             xlab(x_label)+
-                             ylab(y_label)+
-                             #scale_y_continuous(labels = unit_format(unit = "K", scale = 1e-3))+
-                             theme_classic()+
-                             scale_fill_manual(values = c(col_fill_1, col_fill_2))+
-                             theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
-                                   plot.title = element_text(hjust = 0.5)) 
+  df$Contig <- factor(df$Contig, levels = unique(vcf_file_1@fix[,"CHROM"]))
+  
+  if(plot_type == "Bar"){
+    summary_comparison_plot <- df %>%
+      melt(id = "Contig") %>%
+      ggplot(aes(x = Contig, y = value, fill = variable)) +
+      geom_col(position = "dodge", color = "black", width = 0.9)+
+      ggtitle(plot_title)+
+      xlab(x_label)+
+      ylab(y_label)+
+      #scale_y_continuous(labels = unit_format(unit = "K", scale = 1e-3))+
+      theme_classic()+
+      scale_fill_manual(values = c(col_fill_1, col_fill_2))+
+      theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+            plot.title = element_text(hjust = 0.5)) 
+  }
+  
+  if(plot_type == "Line"){
+    summary_comparison_plot <-  df %>%
+      melt(id = "Contig") %>%
+      ggplot(aes(x = Contig, y = value, colour = variable))+
+      geom_line(group = 1,)+
+      geom_point()+
+      ggtitle(plot_title)+
+      xlab(x_label)+
+      ylab(y_label)+
+      #scale_y_continuous(labels = unit_format(unit = "K", scale = 1e-3))+
+      theme_classic()+
+      scale_fill_manual(values = c(col_fill_1, col_fill_2))+
+      theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+            plot.title = element_text(hjust = 0.5))
+  }
+
   rm(df)
   
   summary_comparison_plotly <- ggplotly(summary_comparison_plot) %>%
@@ -239,7 +260,7 @@ get_overall_summary_plot <- function(vcf_sum_table, selected_variant_type, plot_
 }
 
 
-get_venn_diagram_comparison <- function(summary_left, summary_right, summary_both, summary_stat, col_fill_1, col_fill_2, file_1_label, file_2_label){
+get_venn_diagram_comparison <- function(summary_left, summary_right, summary_both, summary_stat, venn_title, col_fill_1, col_fill_2, file_1_label, file_2_label){
   # A function that returns bar plot with comparison of two selected summary statistics
   # Parameters
   # vcf_summary:first entry in the list returned by summarize_vcf function
@@ -256,14 +277,15 @@ get_venn_diagram_comparison <- function(summary_left, summary_right, summary_bot
   venndiagram <- plot(initialize_eulerr,
                       quantities = TRUE,
                       fills = list(fill = c(col_fill_1, col_fill_2)),
-                      legend = list(labels = c(file_1_label, file_2_label)))
+                      legend = list(labels = c(file_1_label, file_2_label)),
+                      main = venn_title)
   
   return(venndiagram)
 }
 
 
 # Function to create histograms of all_variants in each chromosome
-get_all_variant_distribution_in_ech_set <- function(vcf_set_list, selected_variant_set, fill_color, plot_title, x_label, y_label) {
+get_all_variant_distribution_in_ech_set <- function(vcf_set_list, selected_variant_set, selected_contig, selected_bin_size, fill_color, plot_title, x_label, y_label) {
   # vcf_set_list: output created by compare_vcf function
   # selected_variant_list: one of left, right and intersection list
   # All other parameters are for plot customizations
@@ -284,13 +306,14 @@ get_all_variant_distribution_in_ech_set <- function(vcf_set_list, selected_varia
     vcf_file_subset <- as.data.frame(vcf_set_list[3][[1]])
   }
   
+  vcf_file_subset <- vcf_file_subset[vcf_file_subset[,"CHROM"] == selected_contig, ]
+  
   variant_dist_in_contig <- vcf_file_subset %>%
     mutate(POS = as.integer(POS)) %>%
-    mutate(CHROM = as.factor(CHROM)) %>%
     plot_ly(x = ~POS,
             type = "histogram", 
             marker = list(color = fill_color, line = list(color = 'black', width = 1)),
-            frame = ~CHROM) %>%
+            nbinsx = selected_bin_size) %>%
     layout(title = plot_title,
            xaxis = list(title = x_label, showgrid = F, showline= T, linecolor='black', showticklabels = T, ticks="outside"),
            yaxis = list(title = y_label, showgrid = F, showline= T, linecolor='black', showticklabels = T, ticks="outside")) %>%
@@ -326,6 +349,7 @@ get_summary_stat_distribution_in_each_set <- function(vcf_comp_sum_left, vcf_com
     df <- vcf_comp_sum_both[(vcf_comp_sum_both$Contig != "All_Contigs"), c("Contig", summary_stat)]
   }
   
+  df$Contig <- factor(df$Contig, levels = unique(vcf_file_1@fix[,"CHROM"]))
   
   if(plot_type == "Bar"){
     summary_stat_bar_plot <- ggplot(df, aes(x = Contig, y = get(summary_stat)))+
@@ -341,7 +365,7 @@ get_summary_stat_distribution_in_each_set <- function(vcf_comp_sum_left, vcf_com
   
   if(plot_type == "Line"){
     summary_stat_bar_plot <- ggplot(df, aes(x=Contig, get(summary_stat)))+
-      geom_line(linetype = "dashed")+
+      geom_line(group = 1, color = col_fill)+
       geom_point(color = col_fill, size = 2)+
       ggtitle(plot_title)+
       xlab(x_label)+
@@ -363,7 +387,7 @@ get_summary_stat_distribution_in_each_set <- function(vcf_comp_sum_left, vcf_com
   return(summary_stat_bar_plotly)
 }
 
-get_overall_summary_distribution_for_ech_set <- function(vcf_comp_sum_left, vcf_comp_sum_right, vcf_comp_sum_both, selected_variant_set, selected_variant_type, plot_title){
+get_overall_summary_distribution_for_each_set <- function(vcf_comp_sum_left, vcf_comp_sum_right, vcf_comp_sum_both, selected_variant_set, selected_variant_type, plot_title){
   # A function that returns pie charts of distribution variant types
   # Parameters
   # vcf_comp_sum_left, vcf_comp_sum_right, vcf_comp_sum_both: first entry in the list returned by summarize_vcf function
@@ -384,6 +408,7 @@ get_overall_summary_distribution_for_ech_set <- function(vcf_comp_sum_left, vcf_
     df <- vcf_comp_sum_both[(vcf_comp_sum_both$Contig == "All_Contigs"), ]
   }
   
+  df$Contig <- factor(df$Contig, levels = unique(vcf_file_1@fix[,"CHROM"]))
   
   if(selected_variant_type == "All Variants"){
     all_variant_type_labels <- c("SNPs" , "INDELs", "MNPs", "Assorted_Variants")
@@ -451,3 +476,5 @@ get_overall_summary_distribution_for_ech_set <- function(vcf_comp_sum_left, vcf_
 # unique(vcf_file_2@fix[,"CHROM"])
 
 # vcf_file_2@fix[!duplicated(vcf_file_2@fix[,"CHROM"]), "CHROM"]
+
+

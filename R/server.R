@@ -5,7 +5,7 @@ server <- function(input, output, session) {
   #Contents for the About page
   output$introduction <- renderText({"
     <h3> About </h3>
-    SCI-VCF is a multi-platform application that helps users to analyse the variant call format in a guided GUI setting. 
+    SCI-VCF is a multi-platform application that helps users to analyse the variant call format in a guided Graphical User Interface. 
     Summarize, compare and design interactive visualizations of VCFs with a mouse click!
     <br><br>
     <h4>Variant Call Format</h4>
@@ -13,10 +13,31 @@ server <- function(input, output, session) {
     It is widely adopted and is used in many bioinformatics tools that analyze genomic variants. <br><br>
   "})
   
+  # download link for sample vcf 1
+  output$sample_vcf_1_download <- renderUI({
+    shiny::a(
+      h6(icon("file"),
+         "Sample 1",
+         style = "fontweight:600"),
+      href = "https://github.com/venkatk89/SCI-VCF-doc/raw/main/sample_data/HG002_subset.vcf.gz"
+    )
+  })
+  
+  # download link for sample vcf 2
+  output$sample_vcf_2_download <- renderUI({
+    shiny::a(
+      h6(icon("file"),
+         "Sample 2",
+         style = "fontweight:600"),
+      href = "https://github.com/venkatk89/SCI-VCF-doc/raw/main/sample_data/HG003_subset.vcf.gz"
+    )
+  })
+  
+  
   output$upload_size_warning <- renderText({"
     <font color =\"#e2725b\"><i>
     Note: By default, the upload size is limited to 20MB. To work with larger VCFs, please refer to the 
-    <a href=\"https://r-charts.com/colors/\">FAQ </a> section in the documentation.
+    <a href=\"https://venkatk89.github.io/SCI-VCF-doc/faq/\">FAQ </a> section in the documentation.
     </i></font>"
   })
   
@@ -52,11 +73,6 @@ server <- function(input, output, session) {
     read.vcfR(input$upload_vcf$datapath)
   })
   
-  # print accepted file formats
-  output$sample_vcf_message_1 <- renderText({
-    "
-    Downloaded a sample VCF file by clicking <a href=\"https://r-charts.com/colors/\">here </a>.
-    <br>"})
   
   # print wait messsage while reading vcf file
   output$wait_message_1 <- renderText({
@@ -116,7 +132,7 @@ server <- function(input, output, session) {
     req(vcf_summaries())
   "<font color =\"#e2725b\"><i>
     To change the default file processing settings, please refer to the 
-    <a href=\"https://r-charts.com/colors/\">FAQ </a> section in the documentation.
+    <a href=\"https://venkatk89.github.io/SCI-VCF-doc/faq/\">FAQ </a> section in the documentation.
     </i></font>"}
   )
   
@@ -203,13 +219,13 @@ server <- function(input, output, session) {
   # Render Summary comparison plots
   output$summary_comp_in_contig <- renderPlotly(
     get_summary_comparison_plot(sum_vcf_table(),input$summary_comp_variable_1,input$summary_comp_variable_2, 
-                                input$summary_comp_colour_1, input$summary_comp_colour_2, input$summary_comp_plot_title, 
+                                input$summary_comp_colour_1, input$summary_comp_colour_2, input$summary_comp_plot_type, input$summary_comp_plot_title, 
                                 input$summary_comp_x_label, input$summary_comp_y_label)
     )
     
   # Render variant distribution plot for each contig
   output$variant_dist_in_contig <- renderPlotly(
-    get_all_variant_distribution(vcf_data()@fix, input$variant_contig_dist_fill_colour, input$variant_contig_dist_plot_title, 
+    get_all_variant_distribution(vcf_data()@fix,  input$variant_contig_dist_contig, input$variant_contig_dist_bin_size, input$variant_contig_dist_fill_colour, input$variant_contig_dist_plot_title, 
                                  input$variant_contig_dist_x_label, input$variant_contig_dist_y_label)
   )
   
@@ -323,12 +339,6 @@ server <- function(input, output, session) {
     read.vcfR(input$upload_vcf_2$datapath)
   })
   
-  # print accepted file formats
-  output$sample_vcf_message_2 <- renderText({
-    "
-    Download sample VCF files by clicking <a href=\"https://r-charts.com/colors/\">here </a>.
-    <br>"})
-  
   # print wait messsage while reading vcf file
   output$wait_message_compare_1 <- renderText({
     "Post processing, the comparison results will be appear in the sidebar panels. Please wait after upload. A confirmation message will appear soon..."
@@ -358,7 +368,7 @@ server <- function(input, output, session) {
   
   # Render donut plots for overall summary of each variant set
   output$variant_com_set_overall_summary <- renderPlotly(
-    get_overall_summary_distribution_for_ech_set(vcf_comp_summary_left(), vcf_comp_summary_right(), vcf_comp_summary_both(), 
+    get_overall_summary_distribution_for_each_set(vcf_comp_summary_left(), vcf_comp_summary_right(), vcf_comp_summary_both(), 
                                                  input$variant_comp_set_overall_summary, input$variant_comp_set_overall_summary_type, 
                                                  input$variant_comp_set_overall_summary_plot_title)
     )
@@ -366,14 +376,14 @@ server <- function(input, output, session) {
   # Render Venn Diagram for comparison
   output$venn_diagram_comparison <- renderPlot(
     get_venn_diagram_comparison(vcf_comp_summary_left(), vcf_comp_summary_right(), vcf_comp_summary_both(), 
-                                input$venn_summary_stat,  input$venn_color_1, input$venn_color_2, 
+                                input$venn_summary_stat, input$venn_title, input$venn_color_1, input$venn_color_2, 
                                 input$venn_file_1_label, input$venn_file_2_label)
   )
   
   # Render variant distribution plot for each variant set in each contig
   output$variant_comp_set_dist_in_contig <- renderPlotly(
-    get_all_variant_distribution_in_ech_set(comparison_result(), input$variant_comp_set, input$variant_comp_set_dist_fill_colour, 
-                                            input$variant_comp_set_dist_plot_title, input$variant_comp_set_dist_x_label, input$variant_comp_set_dist_y_label)
+    get_all_variant_distribution_in_ech_set(comparison_result(), input$variant_comp_set, input$variant_comp_set_dist_contig, input$variant_comp_set_dist_bin_size,
+                                            input$variant_comp_set_dist_fill_colour, input$variant_comp_set_dist_plot_title, input$variant_comp_set_dist_x_label, input$variant_comp_set_dist_y_label)
   )
   
   # Render summary distribution plots
@@ -530,24 +540,94 @@ server <- function(input, output, session) {
                {updateNavbarPage(session, "navbar", "Home")}
   )
   
+  # Add functionalities to next/previous buttons in contact tab
+  observeEvent(input$quick_guide_next, 
+               {updateNavbarPage(session, "navbar", "Home")}
+  )
+  
+  # Add functionalities to next/previous buttons in contact tab
+  observeEvent(input$contact_next, 
+               {updateNavbarPage(session, "navbar", "Home")}
+  )
+  
   ################################
   
-  # Dynamically update plot titles wherever necessary
+  # Dynamically update plot titles/parameters wherever necessary
   observe({
     # Summary tab plots
     updateTextInput(session, "overall_summary_plot_title", value = paste(input$overall_summary_variant_type, "summary"))
     updateTextInput(session, "summary_stat_dist_plot_title", value = paste(input$summary_stat_dist_variable, "distribution"))
     updateTextInput(session, "summary_comp_plot_title", value = paste(input$summary_comp_variable_1, "vs", input$summary_comp_variable_2))
+    updateTextInput(session, "variant_contig_dist_plot_title", value = paste("Variants distribution of", input$variant_contig_dist_contig, "with max.", input$variant_contig_dist_bin_size, "bins"))
     
     # Compare tab plots
     updateTextInput(session, "variant_comp_set_overall_summary_plot_title", value = paste(input$variant_comp_set_overall_summary, input$variant_comp_set_overall_summary_type, "summary"))
     updateTextInput(session, "variant_comp_set_dist_plot_title", value = paste(input$variant_comp_set, "distribution"))
     updateTextInput(session, "variant_comp_set_summary_stat_dist_plot_title", value = paste(input$variant_comp_set_summary ,input$variant_comp_set_summary_stat_dist_variable, "distribution"))
+    updateTextInput(session, "venn_title", value = paste("Venn Diagram of ", input$venn_summary_stat))
   })
+  
+  
+  ## update contig selector for variant dist plot 
+  observeEvent(vcf_data(), {
+    updateSelectInput(session, "variant_contig_dist_contig", choices = unique(vcf_data()@fix[,"CHROM"]))
+  })
+  
+  ## update contig selector for variant dist plot
+  observeEvent(vcf_data_right(), {
+    unique_contigs <- unique(c(unique(vcf_data_right()@fix[,"CHROM"]), unique(vcf_data_left()@fix[,"CHROM"])))
+    updateSelectInput(session, "variant_comp_set_dist_contig", choices = unique_contigs)
+  })
+  
   
   ##############################
   # Contents for Quick Guide
   
+  
+  
+  ##############################
+  # Contents for Contact page
+  
+  # Link button for Github
+  output$contact_github <- renderUI({
+    shiny::a(
+      h6(icon("github"),
+         "Github",
+         style = "fontweight:600"
+         ),
+      href = "https://github.com/venkatk89/SCI-VCF"
+    )
+  })
+  
+  # link button for docker
+  output$contact_docker <- renderUI({
+    shiny::a(
+      h6(icon("building-user"),
+         "Docker",
+         style = "fontweight:600"),
+      href = "https://hub.docker.com/repository/docker/venkatk89/sci-vcf/general"
+    )
+  })
+  
+  #link button for documentation
+  output$contact_documentation <- renderUI({
+    shiny::a(
+      h6(icon("building-user"),
+         "Documentation",
+         style = "fontweight:600"),
+      href = "https://venkatk89.github.io/SCI-VCF-doc/"
+    )
+  })
+  
+  # link button for ibse website
+  output$contact_ibse <- renderUI({
+    shiny::a(
+      h6(icon("building-user"),
+         "IBSE",
+         style = "fontweight:600"),
+      href = "https://ibse.iitm.ac.in/"
+    )
+  })
   
   ##################################
   # Footer
@@ -556,9 +636,8 @@ server <- function(input, output, session) {
     <br style = \"line-height:10;\">
     <p style = \"text-align: center; padding: 10px; border: 0.5px #808080; background: #f5f5f5;\">
     <font color =\"#000000;\" size = \"1\"><i>
-     &#169; IBSE - IITM, All Rights Reserved by <a href=\"https://r-charts.com/colors/\"> IBSE </a> 
-     <br>
-     Designed and Developed by <a href=\"https://r-charts.com/colors/\">Venkatesh K </a>.
+     &#169; <a href=\"https://ibse.iitm.ac.in/\"> IBSE - IITM </a> .  
+     Designed and Developed by <a href=\"https://venkatk89.github.io/\">Venkatesh K </a>.
     </i></font>
     </p>"
   })
