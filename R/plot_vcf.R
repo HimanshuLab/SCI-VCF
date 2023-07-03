@@ -108,7 +108,7 @@ get_summary_stat_distribution <- function(vcf_sum_table, summary_stat, plot_type
   
   print("Render summary statistic distribution plot")
   df <- vcf_sum_table[(vcf_sum_table$Contig != "All_Contigs"), c("Contig", summary_stat)]
-  df$Contig <- factor(df$Contig, levels = unique(vcf_file_1@fix[,"CHROM"]))
+  df$Contig <- factor(df$Contig, levels = unique(df$Contig))
   
   if(plot_type == "Bar"){
     summary_stat_bar_plot <- ggplot(df, aes(x = Contig, y = get(summary_stat)))+
@@ -159,7 +159,7 @@ get_summary_comparison_plot <- function(vcf_sum_table, summary_stat_1, summary_s
   
   print("Render summary statistic comparison plot")
   df <- vcf_sum_table[(vcf_sum_table$Contig != "All_Contigs"), c("Contig", summary_stat_1, summary_stat_2)]
-  df$Contig <- factor(df$Contig, levels = unique(vcf_file_1@fix[,"CHROM"]))
+  df$Contig <- factor(df$Contig, levels = unique(df$Contig))
   
   if(plot_type == "Bar"){
     summary_comparison_plot <- df %>%
@@ -349,7 +349,7 @@ get_summary_stat_distribution_in_each_set <- function(vcf_comp_sum_left, vcf_com
     df <- vcf_comp_sum_both[(vcf_comp_sum_both$Contig != "All_Contigs"), c("Contig", summary_stat)]
   }
   
-  df$Contig <- factor(df$Contig, levels = unique(vcf_file_1@fix[,"CHROM"]))
+  df$Contig <- factor(df$Contig, levels = unique(df$Contig))
   
   if(plot_type == "Bar"){
     summary_stat_bar_plot <- ggplot(df, aes(x = Contig, y = get(summary_stat)))+
@@ -408,7 +408,7 @@ get_overall_summary_distribution_for_each_set <- function(vcf_comp_sum_left, vcf
     df <- vcf_comp_sum_both[(vcf_comp_sum_both$Contig == "All_Contigs"), ]
   }
   
-  df$Contig <- factor(df$Contig, levels = unique(vcf_file_1@fix[,"CHROM"]))
+  df$Contig <- factor(df$Contig, levels = unique(df$Contig))
   
   if(selected_variant_type == "All Variants"){
     all_variant_type_labels <- c("SNPs" , "INDELs", "MNPs", "Assorted_Variants")
