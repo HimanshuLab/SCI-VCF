@@ -16,7 +16,9 @@ get_all_variant_distribution <- function(vcf_file, selected_contig, selected_bin
                               plot_ly(x = ~POS,
                                       type = "histogram", 
                                       marker = list(color = fill_color, line = list(color = 'black', width = 1)),
-                                      nbinsx = selected_bin_size) %>%
+                                      nbinsx = selected_bin_size,
+                                      hovertemplate = "Bin position: %{x} <br> Variants count: %{y}",
+                                      hoverlabel = list(namelength = 0))%>%
                                       layout(title = plot_title,
                                              xaxis = list(title = x_label, showgrid = F, showline= T, linecolor='black', showticklabels = T, ticks="outside"),
                                              yaxis = list(title = y_label, showgrid = F, showline= T, linecolor='black', showticklabels = T, ticks="outside")) %>%
@@ -44,7 +46,7 @@ get_snp_type_plot <- function(vcf_summary, col_fill, plot_title, x_label, y_labe
   df <- as.data.frame(vcf_summary)
   
   SNP_type <- c("A_to_G", "G_to_A", "C_to_T", "T_to_C", "A_to_C", "C_to_A", "A_to_T", "T_to_A", "C_to_G", "G_to_C", "G_to_T", "T_to_G")
-  snp_type_plot <- ggplot(df[SNP_type,], aes(x=SNP_type, All_Contigs))+
+  snp_type_plot <- ggplot(df[SNP_type,], aes(x=SNP_type, All_Contigs, text = paste("SNP type: ", SNP_type, "<br>", "Count: ", All_Contigs)))+
     geom_col(fill = col_fill, color = "black")+
     ggtitle(plot_title)+
     xlab(x_label)+
@@ -54,7 +56,7 @@ get_snp_type_plot <- function(vcf_summary, col_fill, plot_title, x_label, y_labe
     theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
           plot.title = element_text(hjust = 0.5))
   rm(df)
-  snp_type_plotly <- ggplotly(snp_type_plot) %>%
+  snp_type_plotly <- ggplotly(snp_type_plot, tooltip = c("text")) %>%
     config(displayModeBar = "static", displaylogo = FALSE, 
            modeBarButtonsToRemove = list("sendDataToCloud", "autoScale2d",
                                          "hoverClosestCartesian","hoverCompareCartesian", 
@@ -79,12 +81,16 @@ get_indel_size_distribution_plot <- function(indel_sizes, col_fill_ins, col_fill
   indel_size_dist <- plot_ly(x = insertion_sizes,
             type = "histogram",
             name = "Insertion",
-            marker = list(color = col_fill_ins, line = list(color = 'black', width = 1))
+            marker = list(color = col_fill_ins, line = list(color = 'black', width = 1)),
+            hovertemplate = "Insertion size: %{x} <br> Count: %{y}",
+            hoverlabel = list(namelength = 0)
             )
     
   indel_size_dist <- indel_size_dist %>% add_histogram(x = deletion_sizes,
                                                        name = "Deletion",
-                                                       marker = list(color = col_fill_del, line = list(color = 'black', width = 1))) %>%
+                                                       marker = list(color = col_fill_del, line = list(color = 'black', width = 1)),
+                                                       hovertemplate = "Deletion size: %{x} <br> Count: %{y}",
+                                                       hoverlabel = list(namelength = 0)) %>%
                                       layout(title = plot_title,
                                              xaxis = list(title = x_label, showgrid = F, showline= T, linecolor='black', showticklabels = T, ticks="outside"),
                                              yaxis = list(title = y_label, showgrid = F, showline= T, linecolor='black', showticklabels = T, ticks="outside")) %>%
@@ -111,7 +117,7 @@ get_summary_stat_distribution <- function(vcf_sum_table, summary_stat, plot_type
   df$Contig <- factor(df$Contig, levels = unique(df$Contig))
   
   if(plot_type == "Bar"){
-    summary_stat_bar_plot <- ggplot(df, aes(x = Contig, y = get(summary_stat)))+
+    summary_stat_bar_plot <- ggplot(df, aes(x = Contig, y = get(summary_stat), text = paste("Contig: ", Contig, "<br>", "Metric: ", summary_stat, "<br>", "Count: ", get(summary_stat))))+
       geom_col(fill = col_fill, color = "black")+
       ggtitle(plot_title)+
       xlab(x_label)+
@@ -123,7 +129,7 @@ get_summary_stat_distribution <- function(vcf_sum_table, summary_stat, plot_type
   }
   
   if(plot_type == "Line"){
-    summary_stat_bar_plot <- ggplot(df, aes(x=Contig, get(summary_stat)))+
+    summary_stat_bar_plot <- ggplot(df, aes(x=Contig, get(summary_stat), text = paste("Contig: ", Contig, "<br>", "Metric: ", summary_stat, "<br>", "Count: ", get(summary_stat))))+
       geom_line(group = 1, color = col_fill)+
       geom_point(color = col_fill, size = 2)+
       ggtitle(plot_title)+
@@ -139,7 +145,7 @@ get_summary_stat_distribution <- function(vcf_sum_table, summary_stat, plot_type
   
   rm(df)
   
-  summary_stat_bar_plotly <- ggplotly(summary_stat_bar_plot)%>%
+  summary_stat_bar_plotly <- ggplotly(summary_stat_bar_plot, tooltip = c("text"))%>%
                               config(displayModeBar = "static", displaylogo = FALSE, 
                                    modeBarButtonsToRemove = list("sendDataToCloud", "autoScale2d",
                                                                "hoverClosestCartesian","hoverCompareCartesian", 
@@ -164,7 +170,8 @@ get_summary_comparison_plot <- function(vcf_sum_table, summary_stat_1, summary_s
   if(plot_type == "Bar"){
     summary_comparison_plot <- df %>%
       melt(id = "Contig") %>%
-      ggplot(aes(x = Contig, y = value, fill = variable)) +
+      ggplot(aes(x = Contig, y = value, fill = variable, 
+                 text = paste("Contig: ", Contig, "<br>", "Metric: ", variable, "<br>", "Count: ", value))) +
       geom_col(position = "dodge", color = "black", width = 0.9)+
       ggtitle(plot_title)+
       xlab(x_label)+
@@ -179,7 +186,8 @@ get_summary_comparison_plot <- function(vcf_sum_table, summary_stat_1, summary_s
   if(plot_type == "Line"){
     summary_comparison_plot <-  df %>%
       melt(id = "Contig") %>%
-      ggplot(aes(x = Contig, y = value, colour = variable))+
+      ggplot(aes(x = Contig, y = value, colour = variable, 
+                 text = paste("Contig: ", Contig, "<br>", "Metric: ", variable, "<br>", "Count: ", value)))+
       geom_line(group = 1,)+
       geom_point()+
       ggtitle(plot_title)+
@@ -194,7 +202,7 @@ get_summary_comparison_plot <- function(vcf_sum_table, summary_stat_1, summary_s
 
   rm(df)
   
-  summary_comparison_plotly <- ggplotly(summary_comparison_plot) %>%
+  summary_comparison_plotly <- ggplotly(summary_comparison_plot, tooltip = c("text")) %>%
     config(displayModeBar = "static", displaylogo = FALSE, 
            modeBarButtonsToRemove = list("sendDataToCloud", "autoScale2d",
                                          "hoverClosestCartesian","hoverCompareCartesian", 
@@ -313,7 +321,9 @@ get_all_variant_distribution_in_ech_set <- function(vcf_set_list, selected_varia
     plot_ly(x = ~POS,
             type = "histogram", 
             marker = list(color = fill_color, line = list(color = 'black', width = 1)),
-            nbinsx = selected_bin_size) %>%
+            nbinsx = selected_bin_size,
+            hovertemplate = "Bin position: %{x} <br> Variants count: %{y}",
+            hoverlabel = list(namelength = 0)) %>%
     layout(title = plot_title,
            xaxis = list(title = x_label, showgrid = F, showline= T, linecolor='black', showticklabels = T, ticks="outside"),
            yaxis = list(title = y_label, showgrid = F, showline= T, linecolor='black', showticklabels = T, ticks="outside")) %>%
@@ -352,7 +362,8 @@ get_summary_stat_distribution_in_each_set <- function(vcf_comp_sum_left, vcf_com
   df$Contig <- factor(df$Contig, levels = unique(df$Contig))
   
   if(plot_type == "Bar"){
-    summary_stat_bar_plot <- ggplot(df, aes(x = Contig, y = get(summary_stat)))+
+    summary_stat_bar_plot <- ggplot(df, aes(x = Contig, y = get(summary_stat), 
+                                            text = paste("Contig: ", Contig, "<br>", "Metric: ", summary_stat, "<br>", "Count: ", get(summary_stat))))+
       geom_col(fill = col_fill, color = "black")+
       ggtitle(plot_title)+
       xlab(x_label)+
@@ -364,7 +375,8 @@ get_summary_stat_distribution_in_each_set <- function(vcf_comp_sum_left, vcf_com
   }
   
   if(plot_type == "Line"){
-    summary_stat_bar_plot <- ggplot(df, aes(x=Contig, get(summary_stat)))+
+    summary_stat_bar_plot <- ggplot(df, aes(x=Contig, get(summary_stat), 
+                                            text = paste("Contig: ", Contig, "<br>", "Metric: ", summary_stat, "<br>", "Count: ", get(summary_stat))))+
       geom_line(group = 1, color = col_fill)+
       geom_point(color = col_fill, size = 2)+
       ggtitle(plot_title)+
@@ -378,7 +390,7 @@ get_summary_stat_distribution_in_each_set <- function(vcf_comp_sum_left, vcf_com
 
   rm(df)
   
-  summary_stat_bar_plotly <- ggplotly(summary_stat_bar_plot)%>%
+  summary_stat_bar_plotly <- ggplotly(summary_stat_bar_plot, tooltip = c("text"))%>%
     config(displayModeBar = "static", displaylogo = FALSE, 
            modeBarButtonsToRemove = list("sendDataToCloud", "autoScale2d",
                                          "hoverClosestCartesian","hoverCompareCartesian", 

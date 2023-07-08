@@ -231,7 +231,7 @@ ui <- navbarPage("SCI-VCF",
                       # Get inputs for variant contig distribution plot customization
                       fluidRow(
                         column(4, selectInput("variant_contig_dist_contig", "Select contig", choices = "contig_list_from_vcf")),
-                        column(4, selectInput("variant_contig_dist_bin_size", "Select max. bins size", choices = c(25,50,100, 200), selected = 25)),
+                        column(4, selectInput("variant_contig_dist_bin_size", "Select max. bins size", choices = c(25,50,100,200, 500), selected = 100)),
                         column(4, colourInput("variant_contig_dist_fill_colour", "Select colour", value = "indianred", allowTransparent = TRUE, returnName = TRUE))
                       ),
                       fluidRow(
@@ -508,7 +508,7 @@ ui <- navbarPage("SCI-VCF",
                       p("Pick a chromosome to view the distribution of variants in it. Choose a bin with for the histogram in the slider. "),
                       fluidRow(
                         column(4, selectInput("variant_comp_set_dist_contig", "Select contig", choices = "contig_list_from_vcf")),
-                        column(4, selectInput("variant_comp_set_dist_bin_size", "Select max. bins size", choices = c(25,50,100, 200), selected = 25)),
+                        column(4, selectInput("variant_comp_set_dist_bin_size", "Select max. bins size", choices = c(25,50,100,200,500), selected = 100)),
                         column(4, colourInput("variant_comp_set_dist_fill_colour", "Select colour", value = "lightgreen", allowTransparent = TRUE, returnName = TRUE))
                       ),
                       fluidRow(
