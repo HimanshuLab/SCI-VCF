@@ -605,7 +605,9 @@ ui <- navbarPage("SCI-VCF",
   
   
   tabPanel("Quick Guide",
-           h3("Docs"),
+           h3("Quick Guide"),
+           br(),
+           htmlOutput("quick_quide_intro"),
            linebreaks(3),
            fluidRow(
              column(10, hr()),
