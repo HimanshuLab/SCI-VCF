@@ -17,7 +17,7 @@ for (dependency in required_libraries) {
 ## Advanced user parameters
 
 # set maximum file upload size in shiny to 1 GB
-options(shiny.maxRequestSize = 1 * 1024^2 * 1024^2) 
+options(shiny.maxRequestSize = 1 * 1024^3) 
 
 
 
