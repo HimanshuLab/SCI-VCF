@@ -34,13 +34,6 @@ server <- function(input, output, session) {
   })
   
   
-  output$upload_size_warning <- renderText({"
-    <font color =\"#e2725b\"><i>
-    Note: By default, the upload size is limited to 1GB. To work with larger VCFs, please refer to the 
-    <a href=\"https://venkatk89.github.io/SCI-VCF-doc/faq/\">FAQ </a> section in the documentation.
-    </i></font>"
-  })
-  
   #Action for summarize button in home page
   observeEvent(input$open_summarize, 
                {updateNavbarPage(session, "navbar", "Summarize")}
@@ -66,18 +59,54 @@ server <- function(input, output, session) {
   
   # Contents for the Summarize page
   
+  valid_input_file <- reactiveVal()
+  
+  # Validate the input file as .vcf or .vcf.gz
+  observeEvent(req(input$upload_vcf),
+               # check if last 4 characters of the filepath are ".vcf"
+               if(substr(input$upload_vcf$name, start = nchar(input$upload_vcf$name) - 3, stop = nchar(input$upload_vcf$name)) == ".vcf"){
+                 valid_input_file(TRUE)
+                 output$file_warning_message <- renderText("<font color =\"#e2725b\"><i> </i></font>")
+               } 
+               # else check if last 7 characters are ".vcf.gz"
+               else if(substr(input$upload_vcf$name, start = nchar(input$upload_vcf$name) - 6, stop = nchar(input$upload_vcf$name)) == ".vcf.gz"){
+                 valid_input_file(TRUE)
+                 output$file_warning_message <- renderText("<font color =\"#e2725b\"><i> </i></font>")
+               }
+               else{
+                 valid_input_file(FALSE)
+                 output$file_warning_message <- renderText("<font color =\"#e2725b\"><i> Invalid file uploaded. Only \".vcf\" and \".vcf.gz\" are permitted. </i></font>")
+               }
+                 )
+  
   # read the vcf file as a reactive object
   vcf_data <- reactive({
-    req(input$upload_vcf)
+    req(input$upload_vcf, valid_input_file())
     # using vcfr library to read vcf files
     read.vcfR(input$upload_vcf$datapath)
   })
   
   
+  # Give note about file upload size
+  output$upload_size_warning_summarize <- renderText({"
+  <i>
+    Note: By default, the upload size is limited to 1GB. To work with larger VCFs, please refer to the 
+    <a href=\"https://venkatk89.github.io/SCI-VCF-doc/faq/\">FAQ </a> section in the documentation.
+    </i>"
+  })
+  
+  
   # print wait messsage while reading vcf file
   output$wait_message_1 <- renderText({
-    "Post processing, the summarized results will be appear in the sidebar panels. 
-    Please wait after upload. A confirmation message will appear soon..."})
+    "Please wait after upload. The results will appear in the sidebar panels post processing. 
+    A confirmation message will appear soon..."})
+  
+  # get vcf_summaries matrix object
+  vcf_summaries <- reactive({
+    req(vcf_data())
+    summarize_vcf(vcf_data()@fix)
+    })
+  
   
   output$wait_message_2 <- renderText({
     req(vcf_summaries())
@@ -85,9 +114,7 @@ server <- function(input, output, session) {
     The VCF file is processed. All tabs are populated. Happy exploration!
     </i></font>"}
   )
-  
-  # get vcf_summaries matrix object
-  vcf_summaries <- reactive({summarize_vcf(vcf_data()@fix)})
+
   
   # Get a table of statistics
   sum_vcf_table <- reactive(transpose_summary(vcf_summaries()[1][[1]]))
@@ -325,23 +352,67 @@ server <- function(input, output, session) {
   
   # Contents for the Compare page
   
+  valid_input_file_left <- reactiveVal()
+  
+  # Validate the first input file as .vcf or .vcf.gz
+  observeEvent(req(input$upload_vcf_1),
+               # check if last 4 characters of the filepath are ".vcf"
+               if(substr(input$upload_vcf_1$name, start = nchar(input$upload_vcf_1$name) - 3, stop = nchar(input$upload_vcf_1$name)) == ".vcf"){
+                 valid_input_file_left(TRUE)
+                 output$file_warning_message_left <- renderText("<font color =\"#e2725b\"><i> </i></font>")
+               } 
+               # else check if last 7 characters are ".vcf.gz"
+               else if(substr(input$upload_vcf_1$name, start = nchar(input$upload_vcf_1$name) - 6, stop = nchar(input$upload_vcf_1$name)) == ".vcf.gz"){
+                 valid_input_file_left(TRUE)
+                 output$file_warning_message_left <- renderText("<font color =\"#e2725b\"><i> </i></font>")
+               }
+               else{
+                 valid_input_file_left(FALSE)
+                 output$file_warning_message_left <- renderText("<font color =\"#e2725b\"><i> Invalid file uploaded. Only \".vcf\" and \".vcf.gz\" are permitted. </i></font>")
+               }
+  )
+  
+  
   # read the vcf file uploaded first as a reactive object
   vcf_data_left <- reactive({
-    req(input$upload_vcf_1)
+    req(input$upload_vcf_1, valid_input_file_left())
     # using vcfr library to read vcf files
     read.vcfR(input$upload_vcf_1$datapath)
   })
   
+  
+  valid_input_file_right <- reactiveVal()
+  
+  # Validate the first input file as .vcf or .vcf.gz
+  observeEvent(req(input$upload_vcf_2),
+               # check if last 4 characters of the filepath are ".vcf"
+               if(substr(input$upload_vcf_2$name, start = nchar(input$upload_vcf_2$name) - 3, stop = nchar(input$upload_vcf_2$name)) == ".vcf"){
+                 valid_input_file_right(TRUE)
+                 output$file_warning_message_right <- renderText("<font color =\"#e2725b\"><i> </i></font>")
+               } 
+               # else check if last 7 characters are ".vcf.gz"
+               else if(substr(input$upload_vcf_2$name, start = nchar(input$upload_vcf_2$name) - 6, stop = nchar(input$upload_vcf_2$name)) == ".vcf.gz"){
+                 valid_input_file_right(TRUE)
+                 output$file_warning_message_right <- renderText("<font color =\"#e2725b\"><i> </i></font>")
+               }
+               else{
+                 valid_input_file_right(FALSE)
+                 output$file_warning_message_right <- renderText("<font color =\"#e2725b\"><i> Invalid file uploaded. Only \".vcf\" and \".vcf.gz\" are permitted. </i></font>")
+               }
+  )
+  
+  
   # read the vcf file uploaded second as a reactive object
   vcf_data_right <- reactive({
-    req(input$upload_vcf_2)
+    req(input$upload_vcf_2, valid_input_file_right())
     # using vcfr library to read vcf files
     read.vcfR(input$upload_vcf_2$datapath)
   })
   
   # print wait messsage while reading vcf file
   output$wait_message_compare_1 <- renderText({
-    "Post processing, the comparison results will be appear in the sidebar panels. Please wait after upload. A confirmation message will appear soon..."
+    "Please wait after upload. The results will appear in the sidebar panels post processing. 
+    A confirmation message will appear soon..."
     })
   
   output$wait_message_compare_2 <- renderText({
@@ -352,13 +423,34 @@ server <- function(input, output, session) {
     </i></font>"}
   )
   
+  # Give note about file upload size
+  output$upload_size_warning_compare <- renderText({"
+    <i>
+    Note: By default, the upload size for each file is limited to 1GB. To work with larger VCFs, please refer to the 
+    <a href=\"https://venkatk89.github.io/SCI-VCF-doc/faq/\">FAQ </a> section in the documentation.
+    </i>"
+  })
+  
   # Get the comparison result for the uploaded files
-  comparison_result <- reactive({compare_vcf(vcf_data_left()@fix, vcf_data_right()@fix)})
+  comparison_result <- reactive({
+    req(vcf_data_right(), vcf_data_left())
+    compare_vcf(vcf_data_left()@fix, vcf_data_right()@fix)})
   
   # get vcf_summaries matrix objects for the three comparison variant list
-  comparison_summary_left <- reactive({summarize_vcf(comparison_result()[1][[1]], break_multiallelic_sites = FALSE, remove_duplicated_entries = FALSE)})
-  comparison_summary_right <- reactive({summarize_vcf(comparison_result()[2][[1]], break_multiallelic_sites = FALSE, remove_duplicated_entries = FALSE)})
-  comparison_summary_both <- reactive({summarize_vcf(comparison_result()[3][[1]], break_multiallelic_sites = FALSE, remove_duplicated_entries = FALSE)})
+  comparison_summary_left <- reactive({
+    req(comparison_result())
+    summarize_vcf(comparison_result()[1][[1]], break_multiallelic_sites = FALSE, remove_duplicated_entries = FALSE)
+    })
+  
+  comparison_summary_right <- reactive({
+    req(comparison_result())
+    summarize_vcf(comparison_result()[2][[1]], break_multiallelic_sites = FALSE, remove_duplicated_entries = FALSE)
+    })
+  
+  comparison_summary_both <- reactive({
+    req(comparison_result())
+    summarize_vcf(comparison_result()[3][[1]], break_multiallelic_sites = FALSE, remove_duplicated_entries = FALSE)
+    })
   
   # Get a table of statistics
   vcf_comp_summary_left <- reactive(transpose_summary(comparison_summary_left()[1][[1]]))

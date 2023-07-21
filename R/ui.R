@@ -32,8 +32,6 @@ ui <- navbarPage("SCI-VCF",
             column(3, p("Contact developers / Get support:")),
             column(3, actionButton("open_contact", icon = icon("address-card"), label = "Contact", width = 150)),
           ),
-          linebreaks(3),
-          htmlOutput("upload_size_warning")
           ),
   
   # Define the Sum_VCF panel
@@ -44,11 +42,13 @@ ui <- navbarPage("SCI-VCF",
              tabPanel("Upload VCF", value = "upload_vcf",
                       h3("Summarize your VCF file."),
                       p("Upload a file to start the summarization process. Both compressed (.vcf.gz) and uncompressed (.vcf) files are permitted."),
+                      htmlOutput("upload_size_warning_summarize"),
                       linebreaks(2),
                       fluidRow(
                         column(3, h5("Upload your file here")),
-                        column(9, fileInput("upload_vcf", NULL,placeholder = "No file selected", accept = c(".vcf", ".vcf.gz"))),
+                        column(9, fileInput("upload_vcf", NULL,placeholder = "No file selected", accept = c(".vcf", ".vcf.gz")))
                       ),
+                      htmlOutput("file_warning_message"),
                       br(),
                       # print wait message here
                       textOutput("wait_message_1"),
@@ -354,15 +354,18 @@ ui <- navbarPage("SCI-VCF",
                       h3("Compare your VCF files"),
                       p("Upload File no. 1 and File no. 2 to start the comparison process. 
                         Both compressed (.vcf.gz) and uncompressed (.vcf) files are permitted."),
-                      br(),
+                      htmlOutput("upload_size_warning_compare"),
+                      linebreaks(2),
                       fluidRow(
                         column(3, h5("File No. 1")),
                         column(9, fileInput("upload_vcf_1", NULL,placeholder = "No file selected", accept = c(".vcf", ".vcf.gz"))),
                       ),
+                      htmlOutput("file_warning_message_left"),
                       fluidRow(
                         column(3, h5("File No. 2")),
                         column(9, fileInput("upload_vcf_2", NULL,placeholder = "No file selected", accept = c(".vcf", ".vcf.gz"))),
                       ),
+                      htmlOutput("file_warning_message_right"),
                       br(),
                       # print wait message here
                       textOutput("wait_message_compare_1"),
