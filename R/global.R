@@ -20,7 +20,6 @@ for (dependency in required_libraries) {
 options(shiny.maxRequestSize = 1 * 1024^3) 
 
 
-
 # Load other modules into app.R
 
 source(here("./R/summarize_vcf.R"))
