@@ -46,7 +46,7 @@ ui <- navbarPage("SCI-VCF",
                       linebreaks(2),
                       fluidRow(
                         column(3, h5("Upload your file here")),
-                        column(9, fileInput("upload_vcf", NULL,placeholder = "No file selected", accept = c(".vcf", ".vcf.gz")))
+                        column(9, fileInput("upload_vcf", NULL,placeholder = "No file selected", accept = c(".vcf", ".gz")))
                       ),
                       htmlOutput("file_warning_message"),
                       br(),
@@ -358,12 +358,12 @@ ui <- navbarPage("SCI-VCF",
                       linebreaks(2),
                       fluidRow(
                         column(3, h5("File No. 1")),
-                        column(9, fileInput("upload_vcf_1", NULL,placeholder = "No file selected", accept = c(".vcf", ".vcf.gz"))),
+                        column(9, fileInput("upload_vcf_1", NULL,placeholder = "No file selected", accept = c(".vcf", ".gz"))),
                       ),
                       htmlOutput("file_warning_message_left"),
                       fluidRow(
                         column(3, h5("File No. 2")),
-                        column(9, fileInput("upload_vcf_2", NULL,placeholder = "No file selected", accept = c(".vcf", ".vcf.gz"))),
+                        column(9, fileInput("upload_vcf_2", NULL,placeholder = "No file selected", accept = c(".vcf", ".gz"))),
                       ),
                       htmlOutput("file_warning_message_right"),
                       br(),

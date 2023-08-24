@@ -19,7 +19,7 @@ server <- function(input, output, session) {
       h6(icon("file"),
          "Sample 1",
          style = "fontweight:600"),
-      href = "https://github.com/venkatk89/SCI-VCF-doc/raw/main/sample_data/HG002_subset.vcf.gz"
+      href = "https://github.com/HimanshuLab/SCI-VCF-docs/raw/main/sample_data/HG002_subset.vcf.gz"
     )
   })
   
@@ -29,7 +29,7 @@ server <- function(input, output, session) {
       h6(icon("file"),
          "Sample 2",
          style = "fontweight:600"),
-      href = "https://github.com/venkatk89/SCI-VCF-doc/raw/main/sample_data/HG003_subset.vcf.gz"
+      href = "https://github.com/HimanshuLab/SCI-VCF-docs/raw/main/sample_data/HG003_subset.vcf.gz"
     )
   })
   
@@ -91,7 +91,7 @@ server <- function(input, output, session) {
   output$upload_size_warning_summarize <- renderText({"
   <i>
     Note: By default, the upload size is limited to 1GB. To work with larger VCFs, please refer to the 
-    <a href=\"https://venkatk89.github.io/SCI-VCF-doc/faq/\">FAQ </a> section in the documentation.
+    <a href=\"https://himanshulab.github.io/SCI-VCF-docs/faq/#customization\">FAQ </a> section in the documentation.
     </i>"
   })
   
@@ -159,7 +159,7 @@ server <- function(input, output, session) {
     req(vcf_summaries())
   "<font color =\"#e2725b\"><i>
     To change the default file processing settings, please refer to the 
-    <a href=\"https://venkatk89.github.io/SCI-VCF-doc/faq/\">FAQ </a> section in the documentation.
+    <a href=\"https://himanshulab.github.io/SCI-VCF-docs/faq/#customization\">FAQ </a> section in the documentation.
     </i></font>"}
   )
   
@@ -427,7 +427,7 @@ server <- function(input, output, session) {
   output$upload_size_warning_compare <- renderText({"
     <i>
     Note: By default, the upload size for each file is limited to 1GB. To work with larger VCFs, please refer to the 
-    <a href=\"https://venkatk89.github.io/SCI-VCF-doc/faq/\">FAQ </a> section in the documentation.
+    <a href=\"https://himanshulab.github.io/SCI-VCF-docs/faq/#customization\">FAQ </a> section in the documentation.
     </i>"
   })
   
@@ -709,7 +709,7 @@ server <- function(input, output, session) {
     
     <font color =\"#e2725b\"><i>
     Note: To read the full documentation and know more about SCI-VCF, visit 
-    <a href=\"https://venkatk89.github.io/SCI-VCF-doc/\">here </a>.
+    <a href=\"https://himanshulab.github.io/SCI-VCF-docs/\">here </a>.
     </i></font>
     
   "})
@@ -724,7 +724,7 @@ server <- function(input, output, session) {
          "Github",
          style = "fontweight:600"
          ),
-      href = "https://github.com/venkatk89/SCI-VCF"
+      href = "https://github.com/HimanshuLab/SCI-VCF"
     )
   })
   
@@ -744,7 +744,7 @@ server <- function(input, output, session) {
       h6(icon("building-user"),
          "Documentation",
          style = "fontweight:600"),
-      href = "https://venkatk89.github.io/SCI-VCF-doc/"
+      href = "https://himanshulab.github.io/SCI-VCF-docs/"
     )
   })
   
