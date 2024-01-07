@@ -5,6 +5,16 @@
 # Create function to print newline n times
 linebreaks <- function(n){HTML(strrep(br(), n))}
 
+
+# Download button for reactable objects: downloads data after applying filters applied by users
+interface_search_download_button <- function(id, filename, label) {
+  tags$button(
+    tagList(icon("download"), label),
+    onclick = sprintf("Reactable.downloadDataCSV('%s', '%s')", id, filename)
+  )
+}
+
+
 ui <- navbarPage("SCI-VCF",
   #set the bootswatch theme
   theme = bslib::bs_theme(version = 4, bootswatch = "lumen"),
@@ -27,12 +37,21 @@ ui <- navbarPage("SCI-VCF",
           ),
           linebreaks(3),
           fluidRow(
+            column(3, p("View / Search / Filter a VCF file")),
+            column(3, actionButton("open_interface", icon = icon("searchengin"), label = "Interface", width = 150)),
+            column(3, p("View and search a CSV file:")),
+            column(3, actionButton("open_view_csv", icon = icon("table"), label = "View CSV Files", width = 150)),
+          ),
+          linebreaks(3),
+          fluidRow(
             column(3, p("Get a quick introduction of SCI-VCF:")),
             column(3, actionButton("open_doc", icon = icon("book"), label = "Quick Guide", width = 150)),
             column(3, p("Contact developers / Get support:")),
             column(3, actionButton("open_contact", icon = icon("address-card"), label = "Contact", width = 150)),
           ),
           ),
+  
+  
   
   # Define the Sum_VCF panel
   tabPanel("Summarize", 
@@ -227,7 +246,7 @@ ui <- navbarPage("SCI-VCF",
                       h5("Customization zone"),
                       p("You can edit the following parameters to customize the plot. 
                         Changes made in this zone will be reflected in the plot in real time."),
-                      p("Pick a chromosome to view the distribution of variants in it. Choose a bin with for the histogram in the slider. "),
+                      p("Pick a chromosome to view the distribution of variants in it. Choose a bin width for the histogram in the options "),
                       # Get inputs for variant contig distribution plot customization
                       fluidRow(
                         column(4, selectInput("variant_contig_dist_contig", "Select contig", choices = "contig_list_from_vcf")),
@@ -325,7 +344,7 @@ ui <- navbarPage("SCI-VCF",
                       h3("Delve Deeper"),
                       withLoader(textOutput("download_summary_message"), type = "html", loader = "dnaspin"),
                       br(),
-                      textInput("download_summary_filename", "File Name", value = "Summary_Statistics"),
+                      textInput("download_summary_filename", "Enter file name", value = "Summary_Statistics"),
                       downloadButton("download_summary_statistics", "Download .csv"),
                       
                       linebreaks(5),
@@ -345,7 +364,9 @@ ui <- navbarPage("SCI-VCF",
            
   ), # End of summarize tab panel
   
-  # Define the About page
+  
+  
+  # Define the Compare page
   tabPanel("Compare",
            navlistPanel(
              
@@ -508,7 +529,7 @@ ui <- navbarPage("SCI-VCF",
                                      choices = c("Variants unique to File 1", "Variants unique to File 2", "Variants intersecting in both files"),
                                      selected = "Variants intersecting in both files"),
                       # Get inputs for variant contig distribution plot customization
-                      p("Pick a chromosome to view the distribution of variants in it. Choose a bin with for the histogram in the slider. "),
+                      p("Pick a chromosome to view the distribution of variants in it. Choose a bin width for the histogram in the options "),
                       fluidRow(
                         column(4, selectInput("variant_comp_set_dist_contig", "Select contig", choices = "contig_list_from_vcf")),
                         column(4, selectInput("variant_comp_set_dist_bin_size", "Select max. bins size", choices = c(25,50,100,200,500), selected = 100)),
@@ -541,17 +562,17 @@ ui <- navbarPage("SCI-VCF",
                       br(),
                       h4("Summary of variants unique to File no. 1:"),
                       fluidRow(
-                        column(6, textInput("download_summary_left_filename", "File Name", value = "File_1_unique_variants_Summary_Statistics")),
+                        column(6, textInput("download_summary_left_filename", "Enter file name", value = "File_1_unique_variants_Summary_Statistics")),
                         column(6, downloadButton("download_com_sum_left", "Download .csv"))
                       ),
                       h4("Summary of variants unique to File no. 2:"),
                       fluidRow(
-                        column(6, textInput("download_summary_right_filename", "File Name", value = "File_2_unique_variants_Summary_Statistics")),
+                        column(6, textInput("download_summary_right_filename", "Enter file name", value = "File_2_unique_variants_Summary_Statistics")),
                         column(6, downloadButton("download_com_sum_right", "Download .csv"))
                       ),
                       h4("Summary of variants intersecting both files:"),
                       fluidRow(
-                        column(6, textInput("download_summary_both_filename", "File Name", value = "Intersection_variants_Summary_Statistics")),
+                        column(6, textInput("download_summary_both_filename", "Enter file name", value = "Intersection_variants_Summary_Statistics")),
                         column(6, downloadButton("download_com_sum_both", "Download .csv"))
                       ),
                       linebreaks(3),
@@ -571,22 +592,22 @@ ui <- navbarPage("SCI-VCF",
                       br(),
                       h4("Variants unique to File no. 1:"),
                       fluidRow(
-                        column(6, textInput("download_variants_left_filename", "File Name", value = "File_1_unique_variants")),
+                        column(6, textInput("download_variants_left_filename", "Enter file name", value = "File_1_unique_variants")),
                         column(6, downloadButton("download_com_var_left", "Download .csv"))
                       ),
                       h4("Variants unique to File no. 2:"),
                       fluidRow(
-                        column(6, textInput("download_variants_right_filename", "File Name", value = "File_2_unique_variants")),
+                        column(6, textInput("download_variants_right_filename", "Enter file name", value = "File_2_unique_variants")),
                         column(6, downloadButton("download_com_var_right", "Download .csv"))
                       ),
                       h4("Variants intersecting in both files with annotations from file no. 1:"),
                       fluidRow(
-                        column(6, textInput("download_variants_left_and_right_filename", "File Name", value = "Intersection_variants_with_file_1_Annotation")),
+                        column(6, textInput("download_variants_left_and_right_filename", "Enter file name", value = "Intersection_variants_with_file_1_Annotation")),
                         column(6, downloadButton("download_com_var_left_and_right", "Download .csv"))
                       ),
                       h4("Variants intersecting in both files with annotations from file no. 2:"),
                       fluidRow(
-                        column(6, textInput("download_variants_right_and_left_filename", "File Name", value = "Intersection_variants_with_file_2_Annotation")),
+                        column(6, textInput("download_variants_right_and_left_filename", "Enter file name", value = "Intersection_variants_with_file_2_Annotation")),
                         column(6, downloadButton("download_com_var_right_and_left", "Download .csv"))
                       ),
                       linebreaks(5),
@@ -606,6 +627,220 @@ ui <- navbarPage("SCI-VCF",
            
   ),# End of Compare tab panel
   
+  # Define the new functionality: VCF Interaction
+  tabPanel("Interface",
+           navlistPanel(
+             tabPanel("Upload VCF", value = "upload_for_interface",
+                      h3("Interact with your VCF file"),
+                      p("Upload a file to interact with it. Both compressed (.vcf.gz) and uncompressed (.vcf) files are permitted."),
+                      htmlOutput("upload_size_warning_interface"),
+                      linebreaks(2),
+                      fluidRow(
+                        column(3, h5("Upload your file here")),
+                        column(9, fileInput("upload_vcf_interface", NULL,placeholder = "No file selected", accept = c(".vcf", ".gz")))
+                      ),
+                      htmlOutput("file_warning_message_interface"),
+                      br(),
+                      # print wait message here
+                      p("Please wait after upload. The results will appear in the sidebar panels post processing. 
+                         A confirmation message will appear soon..."),
+                      br(),
+                      withLoader(htmlOutput("wait_message_interface"), type = "html", loader = "dnaspin"),
+                      linebreaks(3),
+                      fluidRow(
+                        column(2, actionButton("interface_upload_previous", icon = icon("home"), label = "Home", width = 100)),
+                        column(8, hr()),
+                        column(2, actionButton("interface_upload_next", icon = icon("circle-chevron-right"), label = "Next", width = 100))
+                        ),
+                      ), # end of upload VCF interface
+             
+             tabPanel("Meta-Information", value = "interface_metadata",
+                      h4("Metadata from the VCF file"),
+                      br(),
+                      h5("View and Search"),
+                      p("Use the tab below for keyword search. Scroll the section for more meta-information on INFO and FORMAT columns."),
+                      withLoader(reactableOutput("vcf_interface_metadata", inline = FALSE), type = "html", loader = "dnaspin"),
+                      linebreaks(3),
+                      h5("Download"),
+                      p("You can also download the meta-information from the VCF file to a seperate text file."),
+                      br(),
+                      fluidRow(
+                        column(6, textInput("download_interface_metadata_filename", "Enter file Name", value = "VCF_file_metadata")),
+                        column(6, downloadButton("download_interface_metadata", "Download .txt"))
+                      ),
+                      linebreaks(3),
+                      fluidRow(
+                        column(2, actionButton("interface_metadata_previous", icon = icon("circle-chevron-left"), label = "Previous", width = 100)),
+                        column(8, hr()),
+                        column(2, actionButton("interface_metadata_next", icon = icon("circle-chevron-right"), label = "Next", width = 100))
+                      ),
+             ), # end of metadata interface tab
+             
+             tabPanel("Sort Variants", value = "sort_variants",
+                      h4("Sort Variants in the VCF file"),
+                      br(),
+                      p("Sort variant in ascending order of CHROM, POS, REF, ALT columns"),
+                      selectizeInput("interface_sort_variants", "", choices = c("Yes", "No"), selected = "Yes"),
+                      br(),
+                      p("Replace ID column with CHROM_POS_REF_ALT entires"),
+                      selectizeInput("interface_add_variant_ids", "", choices = c("Yes", "No"), selected = "Yes"),
+                      br(),
+                      withLoader(htmlOutput("sort_variants_confirmation"), type = "html", loader = "dnaspin"),
+                      linebreaks(3),
+                      h4("Download the sorted VCF file."),
+                      br(),
+                      fluidRow(
+                        column(6, textInput("download_interface_sorted_variants_filename", "Enter file Name", value = "VCF_file_sorted")),
+                        column(6, downloadButton("download_interface_sorted_variants", "Download .vcf.gz"))
+                      ),
+                      linebreaks(3),
+                      fluidRow(
+                        column(2, actionButton("interface_sort_previous", icon = icon("circle-chevron-left"), label = "Previous", width = 100)),
+                        column(8, hr()),
+                        column(2, actionButton("interface_sort_next", icon = icon("circle-chevron-right"), label = "Next", width = 100))
+                      ),
+                      ), # end of sort_variants panel
+             
+             
+             
+             
+            tabPanel("Variant Site Filtering", value = "position_based_filtering",
+                     h4("Filter variants based on variant position"),
+                     br(),
+                     p("Please select all of the parameters below to start the position-based filtration process. If any parameter is not entered, an empty VCF file will be generated."),
+                     br(),
+                     h5("Chromosome filter"),
+                     selectizeInput("interface_contig_filter", "Select Contigs (multiple selection)", choices = "interface_contig_filter_list", multiple = TRUE),
+                     br(),
+                     h5("Positional range filter"),
+                     fluidRow(
+                       column(6, textInput("interface_pos_filter_start", "Minimum value", placeholder = "0")),
+                       column(6, textInput("interface_pos_filter_end", "Maximum value", placeholder = "1000000000"))
+                     ),
+                     br(),
+                     withLoader(htmlOutput("filter_variants_by_site_confirmation"), type = "html", loader = "dnaspin"),
+                     linebreaks(3),
+                     h4("Download the site filtered VCF file."),
+                     br(),
+                     fluidRow(
+                       column(6, textInput("download_interface_filtered_variants_site_filename", "Enter file Name", value = "VCF_file_site_filtered")),
+                       column(6, downloadButton("download_interface_filtered_variants_site", "Download .vcf.gz"))
+                     ),
+                     linebreaks(3),
+                     fluidRow(
+                       column(2, actionButton("interface_filter_site_previous", icon = icon("circle-chevron-left"), label = "Previous", width = 100)),
+                       column(8, hr()),
+                       column(2, actionButton("interface_filter_site_next", icon = icon("circle-chevron-right"), label = "Next", width = 100))
+                     ),
+                      ),
+            
+             
+             tabPanel("Variant Quality Filtering", value = "quality_filtering",
+                      h4("Filter variants based on quality"),
+                      br(),
+                      p("Please select all of the parameters below to start the quality-based filtration process. If any of them are not entered, an empty VCF file will be generated."),
+                      br(),
+                      h5("FILTER column selection"),
+                      selectizeInput("interface_quality_filter", "Select entries (multiple selection)", choices = "interface_quality_filter_list", multiple = TRUE),
+                      br(),
+                      h5("QUAL column selection"),
+                      fluidRow(
+                        column(6, textInput("interface_qual_filter_start", "Minimum value", placeholder = "0")),
+                        column(6, textInput("interface_qual_filter_end", "Maximum value", placeholder = "100000"))
+                      ),
+                      br(),
+                      withLoader(htmlOutput("filter_variants_by_quality_confirmation"), type = "html", loader = "dnaspin"),
+                      linebreaks(3),
+                      h4("Download the quality filtered VCF file."),
+                      br(),
+                      fluidRow(
+                        column(6, textInput("download_interface_filtered_variants_quality_filename", "Enter file Name", value = "VCF_file_quality_filtered")),
+                        column(6, downloadButton("download_interface_filtered_variants_quality", "Download .vcf.gz"))
+                      ),
+                      linebreaks(3),
+                      fluidRow(
+                        column(2, actionButton("interface_filter_quality_previous", icon = icon("circle-chevron-left"), label = "Previous", width = 100)),
+                        column(8, hr()),
+                        column(2, actionButton("interface_filter_quality_next", icon = icon("circle-chevron-right"), label = "Next", width = 100))
+                      ),
+                      ),
+            
+             
+            tabPanel("Variant Type Filtering", value = "type_based_filtering",
+                     h4("Filter variants based on variant type"),
+                     br(),
+                     p("Please select the variant type below to start the variant filtration process. If not selected, an empty VCF file will be generated."),
+                     br(),
+                     h5("Select variant type"),
+                     selectizeInput("interface_variant_type_filter", "Select entries (multiple selection)", choices = c("SNPs", "Insertions", "Deletions", "Others"), multiple = TRUE),
+                     br(),
+                     withLoader(htmlOutput("filter_variants_by_variant_type_confirmation"), type = "html", loader = "dnaspin"),
+                     linebreaks(3),
+                     h4("Download the variant type filtered VCF file."),
+                     br(),
+                     fluidRow(
+                       column(6, textInput("download_interface_filtered_variants_type_filename", "Enter file Name", value = "VCF_file_variant_type_filtered")),
+                       column(6, downloadButton("download_interface_filtered_variants_type", "Download .vcf.gz"))
+                     ),
+                     linebreaks(3),
+                     fluidRow(
+                       column(2, actionButton("interface_filter_type_previous", icon = icon("circle-chevron-left"), label = "Previous", width = 100)),
+                       column(8, hr()),
+                       column(2, actionButton("interface_filter_type_next", icon = icon("circle-chevron-right"), label = "Next", width = 100))
+                     ),
+                     
+            ),
+             
+             tabPanel("Search-based filtering", value = "search_based_filtering",
+                      h4("Search VCF file"),
+                      p("Search individual columns using the tab below the header. To sort entries, click on the respective column header. Adjust column width by resizing header cells. Page navigation options are present below the table."),
+                      htmlOutput("warning_search_vcf"),
+                      br(),
+                      withLoader(reactableOutput("vcf_interface_table_view", inline = FALSE), type = "html", loader = "dnaspin"),
+                      br(),
+                      h5("Download Search Results"),
+                      fluidRow(
+                        column(6, p("Download the variants that pass the search filters"),),
+                        column(6, interface_search_download_button("vcf_interface_table_view", "filtered_variants.csv", "Download .csv"))
+                      ),
+                      linebreaks(3),
+                      fluidRow(
+                        column(2, actionButton("interface_search_previous", icon = icon("circle-chevron-left"), label = "Previous", width = 100)),
+                        column(8, hr()),
+                        column(2, actionButton("interface_search_next", icon = icon("circle-chevron-right"), label = "Next", width = 100))
+                      ),
+                      ), # End of Search-based filtering tab
+             
+             
+             tabPanel("Allele Frequency", value = "allele_frequency",
+                      h4("Calculate variant frequencies"),
+                      h4("Filter variants based on allele frequency")
+             ),
+             
+             
+             id = "Interface",
+             widths = c(3, 9)
+           ), # End of Navigation panel for Interface
+           
+           linebreaks(3),
+           
+           
+  ), #End of for vcf interaction
+  
+  
+  tabPanel("View CSV Files",
+           h3("Load and view .csv files"),
+           br(),
+           #htmlOutput("quick_quide_intro"),
+           linebreaks(3),
+           fluidRow(
+             column(10, hr()),
+             column(2, actionButton("view_csv_files_guide_next", icon = icon("home"), label = "Home", width = 100))
+           ),
+           linebreaks(3),
+           id = "View_CSV_Files",
+           widths = c(3, 9)
+  ), # End of Quick guide panel
   
   tabPanel("Quick Guide",
            h3("Quick Guide"),

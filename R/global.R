@@ -1,7 +1,7 @@
 # define all required libraries and load them
 required_libraries <- c("here", "vcfR", "ggplot2", "scales", "eulerr" ,"dplyr", 
-                        "tidyr", "reshape2", "shiny", "shinycustomloader", 
-                        "colourpicker", "plotly")
+                        "tidyr", "reshape2", "shiny", "shinycustomloader", "reactable",
+                        "htmltools", "colourpicker", "plotly")
 
 for (dependency in required_libraries) {
   if(!require(dependency, character.only = TRUE)){
@@ -24,6 +24,7 @@ options(shiny.maxRequestSize = 1 * 1024^3)
 
 source(here("./R/summarize_vcf.R"))
 source(here("./R/compare_vcf.R"))
+source(here("./R/interact_vcf.R"))
 source(here("./R/plot_vcf.R"))
 source(here("./R/server.R"))
 source(here("./R/ui.R"))
