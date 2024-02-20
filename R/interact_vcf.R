@@ -81,7 +81,7 @@ filter_vcf_by_quality_table <- function(variant_table, filter_list, qual_min, qu
   # Parameters
   # variant_table: a variant table outputted by view_variants()
   # filter_list: output of selectizeinput with multiple = True. contains a list FILTER entries
-  # pos_min, pos_max: min and max values to mention QUAL range
+  # qual_min, qual_max: min and max values to mention QUAL range
   print("Filter variants based on variant quality")
   
   # Filter based on requested quality parameters
@@ -124,6 +124,25 @@ filter_vcf_by_variant_type_table <- function(variant_table, selected_variant_typ
   return(filtered_variant_table)
 }
 
+
+filter_vcf_by_maf_table <- function(variant_file, maf_min, maf_max){
+  ## 
+  # Function to return a table of variants based on input MAF range
+  # Parameters
+  # variant_file: a valid vcfR object
+  # maf_min, maf_max: min and max values to mention MAF range
+  print("Filter variants based on MAF")
+  
+  # Compute MAF for all variants
+  maf_data <- maf(variant_file)
+  
+  # Select variants that fall under the input MAF range
+  selected_variants <-  (maf_data[,"Frequency"] >= 0 & maf_data[,"Frequency"] <= 0.5)
+  
+  # Filter vcf file based on requested MAF parameters
+  return(variant_file@fix[selected_variants, ])
+}
+
 create_vcf_from_variant_table <- function(variant_table, metadata){
   ##
   # Function to return a VCF with variants and metadata input given
@@ -143,7 +162,15 @@ create_vcf_from_variant_table <- function(variant_table, metadata){
   # change metadata, fix and gt of initialized output to the required input format
   output_vcf_file@meta <- metadata
   output_vcf_file@fix <- as.matrix(variant_table[,colnames(vcfR_test@fix)])
-  output_vcf_file@gt <- as.matrix(variant_table[,!(colnames(variant_table) %in% colnames(vcfR_test@fix))])
+  
+  # Check if input VCF file has GT and only add them is it had. Else just add empty GT
+  if(length(variant_table[,!(colnames(variant_table) %in% colnames(vcfR_test@fix))]) > 0){
+    output_vcf_file@gt <- as.matrix(variant_table[,!(colnames(variant_table) %in% colnames(vcfR_test@fix))])
+  }
+  else{
+    output_vcf_file@gt <- matrix(rep("./.", nrow(variant_table)), nrow=nrow(variant_table), ncol=1)
+    colnames(output_vcf_file@gt) <- "Dummy_sample"
+  }
   
   return(output_vcf_file)
 }
@@ -165,16 +192,25 @@ create_vcf_from_variant_table <- function(variant_table, metadata){
 # 
 
 
-# vcf_file_1 <- read.vcfR("/Users/venkateshk/Desktop/Bioinformatics/sci-vcf_development/vcf_files/HG002_subset.vcf.gz")
+
+# vcf_file_1 <- read.vcfR("/Users/venkateshk/Desktop/IBSE-IITM/SCI-VCF-complete-directory/sci-vcf_development/vcf_files/HG002_subset.vcf.gz")
+# vcf_file_2 <- read.vcfR("/Users/venkateshk/Desktop/IBSE-IITM/SCI-VCF-complete-directory/case_study/temp.vcf")
+
 # unique(vcf_file_1@fix[,"CHROM"])
 # unique(vcf_file_1@fix[,"FILTER"])
-# variant_table <- view_variants(vcf_file_1)
-
-# filtered_table <- filter_vcf_by_quality_table(variant_table, c("PASS"), 50, 1000)
-# filtered_table <- filter_vcf_by_site_table(variant_table, c("chr20", "chr22"), 0, 100000)
-# filtered_table <- filter_vcf_by_variant_type_table(variant_table, c("SNPs", "Insertions"))
+# variant_table_1 <- view_variants(vcf_file_1)
+# variant_table_2 <- view_variants(vcf_file_2)
 
 # sorted_table <- sort_vcf_table(variant_table, "Yes", "Yes")
 # sorted_file <- create_vcf_from_variant_table(sorted_table, vcf_file_1@meta)
+# filtered_table <- filter_vcf_by_quality_table(variant_table, c("PASS"), 50, 1000)
+# filtered_table <- filter_vcf_by_site_table(variant_table, c("chr20", "chr22"), 0, 100000)
+# filtered_table <- filter_vcf_by_variant_type_table(variant_table, c("SNPs", "Insertions"))
+# filtered_table_1 <- filter_vcf_by_site_table(variant_table_2, c("chr6"), 0, 100000)
 
 
+# output_vcf <- create_vcf_from_variant_table(filtered_table_1, vcf_file_2@meta)
+# write.vcf(output_vcf, "/Users/venkateshk/Desktop/temp_2.vcf")
+# test_maf_data <- maf(vcf_file_1, element = 2)
+# sum(test_maf_data[,"Frequency"] >= 0 & test_maf_data[,"Frequency"] <= 0.5)
+# vcf_file_filtered <- vcf_file_1@fix[test_maf_data[,"Frequency"] >= 0 & test_maf_data[,"Frequency"] <= 0.4 , ]

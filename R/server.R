@@ -282,7 +282,7 @@ server <- function(input, output, session) {
       paste0(input$download_summary_filename, ".csv")
     },
     content = function(file) {
-      write.csv(sum_vcf_table(), file)
+      write.csv(sum_vcf_table(), file, row.names = FALSE)
     }
   )
   
@@ -511,7 +511,7 @@ server <- function(input, output, session) {
       paste0(input$download_summary_left_filename, ".csv")
     },
     content = function(file) {
-      write.csv(vcf_comp_summary_left(), file)
+      write.csv(vcf_comp_summary_left(), file, row.names = FALSE)
     }
   )
   
@@ -521,7 +521,7 @@ server <- function(input, output, session) {
       paste0(input$download_summary_right_filename, ".csv")
     },
     content = function(file) {
-      write.csv(vcf_comp_summary_right(), file)
+      write.csv(vcf_comp_summary_right(), file, row.names = FALSE)
     }
   )
   
@@ -531,7 +531,7 @@ server <- function(input, output, session) {
       paste0(input$download_summary_both_filename, ".csv")
     },
     content = function(file) {
-      write.csv(vcf_comp_summary_both(), file)
+      write.csv(vcf_comp_summary_both(), file, row.names = FALSE)
     }
   )
   
@@ -548,7 +548,7 @@ server <- function(input, output, session) {
       paste0(input$download_variants_left_filename, ".csv")
     },
     content = function(file) {
-      write.csv(comparison_result()[1][[1]], file)
+      write.csv(comparison_result()[1][[1]], file, row.names = FALSE)
     }
   )
   
@@ -558,7 +558,7 @@ server <- function(input, output, session) {
       paste0(input$download_variants_right_filename, ".csv")
     },
     content = function(file) {
-      write.csv(comparison_result()[2][[1]], file)
+      write.csv(comparison_result()[2][[1]], file, row.names = FALSE)
     }
   )
   
@@ -568,7 +568,7 @@ server <- function(input, output, session) {
       paste0(input$download_variants_left_and_right_filename, ".csv")
     },
     content = function(file) {
-      write.csv(comparison_result()[3][[1]], file)
+      write.csv(comparison_result()[3][[1]], file, row.names = FALSE)
     }
   )
   
@@ -578,7 +578,7 @@ server <- function(input, output, session) {
       paste0(input$download_variants_right_and_left_filename, ".csv")
     },
     content = function(file) {
-      write.csv(comparison_result()[4][[1]], file)
+      write.csv(comparison_result()[4][[1]], file, row.names = FALSE)
     }
   )
   
@@ -917,8 +917,105 @@ server <- function(input, output, session) {
   
   
   
+  # filter variants based on Minor Allele Frequency. And get variants table
+  vcf_maf_filtered_table <- reactive({
+    req(vcf_data_interface(), input$interface_maf_filter_start, input$interface_maf_filter_end)
+    filter_vcf_by_maf_table(vcf_data_interface(), as.numeric(input$interface_maf_filter_start),as.numeric(input$interface_maf_filter_end))
+  })
+  
+  # confirmation message for filtering variants based on quality
+  output$filter_variants_by_maf_confirmation <- renderText({
+    req(vcf_maf_filtered_table(), input$interface_maf_filter_start, input$interface_maf_filter_end)
+    "<font color =\"#e2725b\"><i>
+    The VCF file is filtered for Minor Allele Frequency. You can proceed with the download!
+    </i></font>"
+  }
+  )
+  
+  
+  # download button for VCF file with quality filtered variants
+  output$download_interface_filtered_variants_maf <- downloadHandler(
+    filename = function() {
+      paste0(input$download_interface_filtered_variants_maf_filename, ".vcf.gz")
+    },
+    content = function(file) {
+      write.vcf(create_vcf_from_variant_table(vcf_maf_filtered_table(), vcf_data_interface()@meta), file = file)
+    }
+  )
+  
+  ##############################
+  # Contents for View Csv Files
+  
+  
+  valid_input_file_view_csv <- reactiveVal()
+  
+  # Validate the input file as .csv 
+  observeEvent(req(input$upload_csv_for_view),
+               # check if last 4 characters of the filepath are ".csv"
+               if(substr(input$upload_csv_for_view$name, start = nchar(input$upload_csv_for_view$name) - 3, stop = nchar(input$upload_csv_for_view$name)) == ".csv"){
+                 valid_input_file_view_csv(TRUE)
+                 output$file_warning_message_view_csv <- renderText("<font color =\"#e2725b\"><i> </i></font>")
+               } 
+               else{
+                 valid_input_file_view_csv(FALSE)
+                 output$file_warning_message_view_csv <- renderText("<font color =\"#e2725b\"><i> Invalid file uploaded. Only \".csv\" and \".tsv\" are permitted. </i></font>")
+               }
+  )
+  
+  # read the csv file as a reactive object
+  view_csv_data <- reactive({
+    req(input$upload_csv_for_view, valid_input_file_view_csv())
+    # using vcfr library to read vcf files
+    read.csv(input$upload_csv_for_view$datapath)
+  })
+  
+  
+  # Give note about file upload size
+  output$upload_size_warning_view_csv <- renderText({"
+  <i>
+    Note: By default, the upload size is limited to 1GB. To work with larger files, please refer to the 
+    <a href=\"https://himanshulab.github.io/SCI-VCF-docs/faq/#customization\">FAQ </a> section in the documentation.
+    </i>"
+  })
+  
+  
+  # print wait messsage while reading csv file
+  output$wait_message_view_csv <- renderText({
+    "Please wait after upload. The results will appear below soon. Kindly note that this module requires ample computational resources for large files."})
+  
+  
+  # View CSV output: Display a reactable object
+  output$view_csv_table <- renderReactable({
+    reactable(view_csv_data(), 
+              filterable = TRUE,
+              #searchable = TRUE,
+              minRows = 10, 
+              paginationType = "jump", 
+              resizable = TRUE, 
+              wrap = FALSE, 
+              bordered = TRUE,
+              striped = TRUE,
+              highlight = TRUE,
+              theme = reactableTheme(
+                borderColor = "#dfe2e5",
+                stripedColor = "#f6f8fa",
+                highlightColor = "#f0f5f9",
+                style = list(fontFamily = "-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif"),
+                searchInputStyle = list(width = "100%"),
+                headerStyle = list(
+                  "&:hover[aria-sort]" = list(background = "hsl(0, 0%, 96%)"),
+                  "&[aria-sort='ascending'], &[aria-sort='descending']" = list(background = "hsl(0, 0%, 96%)"),
+                  borderColor = "#555"
+                )
+              )
+    )}
+  )
   
  
+  # Add functionalities to next/previous buttons in view_csv tab
+  observeEvent(input$view_csv_files_guide_next, 
+               {updateNavbarPage(session, "navbar", "Home")}
+  )
   
   ##############################
   # Contents for Quick Guide

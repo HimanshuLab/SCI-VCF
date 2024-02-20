@@ -627,7 +627,7 @@ ui <- navbarPage("SCI-VCF",
            
   ),# End of Compare tab panel
   
-  # Define the new functionality: VCF Interaction
+  # Define the new functionality: VCF Inspection
   tabPanel("Interface",
            navlistPanel(
              tabPanel("Upload VCF", value = "upload_for_interface",
@@ -813,8 +813,25 @@ ui <- navbarPage("SCI-VCF",
              
              
              tabPanel("Allele Frequency", value = "allele_frequency",
-                      h4("Calculate variant frequencies"),
-                      h4("Filter variants based on allele frequency")
+                      h4("Filter variants based on Minor Allele Frequency (MAF)"),
+                      br(),
+                      p("MAF refers to the frequency at which the second most common allele occurs in a given population"),
+                      p("Please select all of the parameters below to start the allele-frequency-based filtration process. If any of them are not entered, an empty VCF file will be generated."),
+                      br(),
+                      h5("Select a range of MAF"),
+                      fluidRow(
+                        column(6, textInput("interface_maf_filter_start", "Minimum value", placeholder = "0")),
+                        column(6, textInput("interface_maf_filter_end", "Maximum value", placeholder = "1"))
+                      ),
+                      br(),
+                      withLoader(htmlOutput("filter_variants_by_maf_confirmation"), type = "html", loader = "dnaspin"),
+                      linebreaks(3),
+                      h4("Download the MAF filtered VCF file."),
+                      br(),
+                      fluidRow(
+                        column(6, textInput("download_interface_filtered_variants_maf_filename", "Enter file Name", value = "VCF_file_maf_filtered")),
+                        column(6, downloadButton("download_interface_filtered_variants_maf", "Download .vcf.gz"))
+                      ),
              ),
              
              
@@ -825,13 +842,34 @@ ui <- navbarPage("SCI-VCF",
            linebreaks(3),
            
            
-  ), #End of for vcf interaction
+  ), #End of for vcf inspetion
   
   
   tabPanel("View CSV Files",
-           h3("Load and view .csv files"),
+           h3("View files with tabular data"),
            br(),
-           #htmlOutput("quick_quide_intro"),
+           p("Upload a .csv file to view, search and filter the contents in it."),
+           htmlOutput("upload_size_warning_view_csv"),
+           linebreaks(2),
+           fluidRow(
+             column(3, h5("Upload your file here")),
+             column(9, fileInput("upload_csv_for_view", NULL,placeholder = "No file selected", accept = c(".csv")))
+           ),
+           htmlOutput("file_warning_message_view_csv"),
+           br(),
+           # print wait message here
+           textOutput("wait_message_view_csv"),
+           hr(),
+           linebreaks(3),
+           p("Search individual columns using the tab below the header. To sort entries, click on the respective column header. Adjust column width by resizing header cells. Page navigation options are present below the table."),
+           br(),
+           withLoader(reactableOutput("view_csv_table", inline = FALSE), type = "html", loader = "dnaspin"),
+           linebreaks(3),
+           h5("Download Results"),
+           fluidRow(
+             column(6, p("Download the version of the table currently being viewed:"),),
+             column(6, interface_search_download_button("view_csv_table", "filtered_table.csv", "Download .csv"))
+           ),
            linebreaks(3),
            fluidRow(
              column(10, hr()),
@@ -840,7 +878,7 @@ ui <- navbarPage("SCI-VCF",
            linebreaks(3),
            id = "View_CSV_Files",
            widths = c(3, 9)
-  ), # End of Quick guide panel
+  ), # End of View CSV files panel
   
   tabPanel("Quick Guide",
            h3("Quick Guide"),
