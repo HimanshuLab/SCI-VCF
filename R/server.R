@@ -1,5 +1,8 @@
-# RScript defining the backend server functions
-
+###
+# Code: R/server.R
+# Author: Venkatesh K
+# Function: Defines the backend server functions of SCI-VCF
+###
 server <- function(input, output, session) {
   
   #Contents for the About page
@@ -141,8 +144,8 @@ server <- function(input, output, session) {
     paste("Number of contigs with variants: ", (length(colnames(vcf_summaries()[1][[1]])) -1))
   )
  
-  output$filter_column_entries <- renderText(
-    paste("FILTER column values: ", unlist(unique(vcf_data()@fix[,"FILTER"])))
+  output$no_metadata_lines <- renderText(
+    paste("Number of meta-information lines: ", length(vcf_data()@meta))
     )
   
   output$no_of_entries <- renderText(
@@ -770,9 +773,11 @@ server <- function(input, output, session) {
   # confirmation message for sorting variants
   output$sort_variants_confirmation <- renderText({
     req(vcf_sorted_table())
+    paste("Selected parameters are", input$interface_sort_variants, "and", input$interface_add_variant_ids, ".",
     "<font color =\"#e2725b\"><i>
-    The VCF file is sorted. You can proceed with the download!
-    </i></font>"}
+    <br> The VCF file is sorted. You can proceed with the download! <br>
+    </i></font>")
+    }
   )
   
   # download button for VCF file with sorted variants and added ids
@@ -801,9 +806,10 @@ server <- function(input, output, session) {
   # confirmation message for filtering variants based on variant site
   output$filter_variants_by_site_confirmation <- renderText({
     req(vcf_site_filtered_table(), input$interface_contig_filter, input$interface_pos_filter_start, input$interface_pos_filter_end)
+    paste("Selected genomic region(s) is (are)", input$interface_contig_filter, ":", input$interface_pos_filter_start, "-", input$interface_pos_filter_end, 
     "<font color =\"#e2725b\"><i>
-    The VCF file is filtered for selected sites. You can proceed with the download!
-    </i></font>"
+    <br> The VCF file is filtered for selected sites. You can proceed with the download! <br>
+    </i></font>")
     }
   )
   
@@ -833,9 +839,10 @@ server <- function(input, output, session) {
   # confirmation message for filtering variants based on quality
   output$filter_variants_by_quality_confirmation <- renderText({
     req(vcf_quality_filtered_table(), input$interface_quality_filter, input$interface_qual_filter_start, input$interface_qual_filter_end)
+    paste("Selected quality metrics are ", input$interface_quality_filter, ",", input$interface_qual_filter_start, ", and", input$interface_qual_filter_end, ".",
     "<font color =\"#e2725b\"><i>
-    The VCF file is filtered for quality. You can proceed with the download!
-    </i></font>"
+    <br> The VCF file is filtered for quality. You can proceed with the download! <br>
+    </i></font>")
   }
   )
   
@@ -862,9 +869,11 @@ server <- function(input, output, session) {
   # confirmation message for filtering variants based on variant type
   output$filter_variants_by_variant_type_confirmation <- renderText({
     req(vcf_type_filtered_table(), input$interface_variant_type_filter)
-    "<font color =\"#e2725b\"><i>
-    The VCF file is filtered for variant type. You can proceed with the download!
-    </i></font>"
+    paste("Selected variant type(s) is (are)", unlist(input$interface_variant_type_filter), ".", 
+          "<font color =\"#e2725b\"><i>
+    <br>The VCF file is filtered for variant type. You can proceed with the download! <br>
+    </i></font>")
+    
   }
   )
   
@@ -917,30 +926,87 @@ server <- function(input, output, session) {
   
   
   
-  # filter variants based on Minor Allele Frequency. And get variants table
-  vcf_maf_filtered_table <- reactive({
-    req(vcf_data_interface(), input$interface_maf_filter_start, input$interface_maf_filter_end)
-    filter_vcf_by_maf_table(vcf_data_interface(), as.numeric(input$interface_maf_filter_start),as.numeric(input$interface_maf_filter_end))
-  })
+  # # filter variants based on Minor Allele Frequency. And get variants table
+  # vcf_maf_filtered_table <- reactive({
+  #   req(vcf_data_interface(), input$interface_maf_filter_start, input$interface_maf_filter_end)
+  #   filter_vcf_by_maf_table(vcf_data_interface(), as.numeric(input$interface_maf_filter_start),as.numeric(input$interface_maf_filter_end))
+  # })
+  # 
+  # # confirmation message for filtering variants based on quality
+  # output$filter_variants_by_maf_confirmation <- renderText({
+  #   req(vcf_maf_filtered_table(), input$interface_maf_filter_start, input$interface_maf_filter_end)
+  #   "<font color =\"#e2725b\"><i>
+  #   The VCF file is filtered for Minor Allele Frequency. You can proceed with the download!
+  #   </i></font>"
+  # }
+  # )
+  # 
+  # 
+  # # download button for VCF file with quality filtered variants
+  # output$download_interface_filtered_variants_maf <- downloadHandler(
+  #   filename = function() {
+  #     paste0(input$download_interface_filtered_variants_maf_filename, ".vcf.gz")
+  #   },
+  #   content = function(file) {
+  #     write.vcf(create_vcf_from_variant_table(vcf_maf_filtered_table(), vcf_data_interface()@meta), file = file)
+  #   }
+  # )
   
-  # confirmation message for filtering variants based on quality
-  output$filter_variants_by_maf_confirmation <- renderText({
-    req(vcf_maf_filtered_table(), input$interface_maf_filter_start, input$interface_maf_filter_end)
-    "<font color =\"#e2725b\"><i>
-    The VCF file is filtered for Minor Allele Frequency. You can proceed with the download!
-    </i></font>"
-  }
+  # Add functionalities to next/previous buttons in compare tab
+  observeEvent(input$interface_upload_previous, 
+               {updateNavbarPage(session, "navbar", "Home")}
   )
   
+  observeEvent(input$interface_upload_next, 
+               {updateNavlistPanel(session, "Interface", "interface_metadata")}
+  )
   
-  # download button for VCF file with quality filtered variants
-  output$download_interface_filtered_variants_maf <- downloadHandler(
-    filename = function() {
-      paste0(input$download_interface_filtered_variants_maf_filename, ".vcf.gz")
-    },
-    content = function(file) {
-      write.vcf(create_vcf_from_variant_table(vcf_maf_filtered_table(), vcf_data_interface()@meta), file = file)
-    }
+  observeEvent(input$interface_metadata_previous, 
+               {updateNavlistPanel(session, "Interface", "upload_for_interface")}
+  )
+  
+  observeEvent(input$interface_metadata_next, 
+               {updateNavlistPanel(session, "Interface", "sort_variants")}
+  )
+  
+  observeEvent(input$interface_sort_previous, 
+               {updateNavlistPanel(session, "Interface", "interface_metadata")}
+  )
+  
+  observeEvent(input$interface_sort_next, 
+               {updateNavlistPanel(session, "Interface", "position_based_filtering")}
+  )
+  
+  observeEvent(input$interface_filter_site_previous, 
+               {updateNavlistPanel(session, "Interface", "sort_variants")}
+  )
+  
+  observeEvent(input$interface_filter_site_next, 
+               {updateNavlistPanel(session, "Interface", "quality_filtering")}
+  )
+  
+  observeEvent(input$interface_filter_quality_previous, 
+               {updateNavlistPanel(session, "Interface", "position_based_filtering")}
+  )
+  
+  observeEvent(input$interface_filter_quality_next, 
+               {updateNavlistPanel(session, "Interface", "type_based_filtering")}
+  )
+  
+  observeEvent(input$interface_filter_type_previous, 
+               {updateNavlistPanel(session, "Interface", "quality_filtering")}
+  )
+  
+  observeEvent(input$interface_filter_type_next, 
+               {updateNavlistPanel(session, "Interface", "search_based_filtering")}
+  )
+  
+  observeEvent(input$interface_search_previous, 
+               {updateNavlistPanel(session, "Interface", "type_based_filtering")}
+  )
+  
+  observeEvent(input$interface_search_next, 
+               {updateNavbarPage(session, "navbar", "Home")}
   )
   
   ##############################
@@ -1021,14 +1087,15 @@ server <- function(input, output, session) {
   # Contents for Quick Guide
   
   output$quick_quide_intro <- renderText({"
-    SCI-VCF has three major workflows:
+    SCI-VCF has four workflows:
     <br>
     <p>
     1) Summarize: The summary of a VCF file is generated by classifying variants and 
     summing up unique entries in each category.<br>
     2) Compare: Unique and common variants in two VCF files are identified
     by using the first eight mandatory columns as two-dimensional heterogeneous tabular datasets.<br>
-    3) Interface: 
+    3) Interface: Contents of a VCF file can be viewed, searched, sorted, identified, and filtered. <br>
+    4) View CSV Files: Contents of a CSV file can be viewed, searched, sorted, identified, and filtered.
     </p>
     <h5>Summarize Submodules</h5>
     <p>
@@ -1053,9 +1120,20 @@ server <- function(input, output, session) {
     <li>Download Variants: Extract the common and unique variants as a tabular dataset for further analysis.</li>
     </p>
     
+    <h5>Interface Submodules</h5>
+    <p>
+    <li>Upload VCF: Click the browse button and upload a VCF file.</li>
+    <li>Meta-Information: View, search, and download the meta-information present in the uploaded file.</li>
+    <li>Sort Variants: Sort variants in ascending order of CHROM, POS, REF, and ALT columns. Unique variant IDs can also be added in CHROM_POS_REF_ALT format.</li>
+    <li>Variant Site Filtering: Filter variants from a particular genomic region.</li>
+    <li>Variant Quality Filtering: Filter variants based on the FILTER and QUAL columns.</li>
+    <li>Variant Type Filtering: Filter SNPs and INDELs separately.</li>
+    <li>Search-based Filtering: View the contents of a VCF file and filter based on keyword search.</li>
+    </p>
+    
     <font color =\"#e2725b\"><i>
     Note: To read the full documentation and know more about SCI-VCF, visit 
-    <a href=\"https://himanshulab.github.io/SCI-VCF-docs/\">here </a>.
+    <a href=\"https://himanshulab.github.io/SCI-VCF-docs/\">here</a>.
     </i></font>
     
   "})
@@ -1110,6 +1188,12 @@ server <- function(input, output, session) {
     )
   })
   
+  # Cite the paper
+  
+  output$cite <- renderText("<font>
+  Venkatesh Kamaraj, and Himanshu Sinha. \"SCI-VCF: A cross-platform GUI solution to Summarise, Compare, Inspect, and Visualise the Variant Call Format,\" 2024. https://doi.org/10.1101/2023.08.09.552664
+    <a href=\"https://doi.org/10.1101/2023.08.09.552664\"></a>
+    </font>") 
   
   # Add functionalities to next/previous buttons in contact tab
   observeEvent(input$contact_next, 

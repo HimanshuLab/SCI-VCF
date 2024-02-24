@@ -1,4 +1,8 @@
-# RScript containing modules that plot VCF summary
+###
+# Code: R/plot_vcf.R
+# Author: Venkatesh K
+# Function: Contains modules that plots genetic variants from VCF 
+###
 
 
 # Function to create histograms of all_variants in each chromosome

@@ -1,6 +1,8 @@
-# RScript defining the UI of the app
-
-
+###
+# Code: R/ui.R
+# Author: Venkatesh K
+# Function: Defines the frontend UI of SCI-VCF
+###
 
 # Create function to print newline n times
 linebreaks <- function(n){HTML(strrep(br(), n))}
@@ -90,7 +92,7 @@ ui <- navbarPage("SCI-VCF",
                       fluidRow(
                        column(4, withLoader(textOutput("no_of_contigs"), type = "html", loader = "dnaspin")),
                        column(4, textOutput("no_of_samples")),
-                       column(4, textOutput("filter_column_entries")),
+                       column(4, textOutput("no_metadata_lines")),
                       ),
                       br(),
                       fluidRow(
@@ -791,7 +793,7 @@ ui <- navbarPage("SCI-VCF",
                      
             ),
              
-             tabPanel("Search-based filtering", value = "search_based_filtering",
+             tabPanel("Search-based Filtering", value = "search_based_filtering",
                       h4("Search VCF file"),
                       p("Search individual columns using the tab below the header. To sort entries, click on the respective column header. Adjust column width by resizing header cells. Page navigation options are present below the table."),
                       htmlOutput("warning_search_vcf"),
@@ -807,32 +809,32 @@ ui <- navbarPage("SCI-VCF",
                       fluidRow(
                         column(2, actionButton("interface_search_previous", icon = icon("circle-chevron-left"), label = "Previous", width = 100)),
                         column(8, hr()),
-                        column(2, actionButton("interface_search_next", icon = icon("circle-chevron-right"), label = "Next", width = 100))
+                        column(2, actionButton("interface_search_next", icon = icon("home"), label = "Home", width = 100))
                       ),
                       ), # End of Search-based filtering tab
              
              
-             tabPanel("Allele Frequency", value = "allele_frequency",
-                      h4("Filter variants based on Minor Allele Frequency (MAF)"),
-                      br(),
-                      p("MAF refers to the frequency at which the second most common allele occurs in a given population"),
-                      p("Please select all of the parameters below to start the allele-frequency-based filtration process. If any of them are not entered, an empty VCF file will be generated."),
-                      br(),
-                      h5("Select a range of MAF"),
-                      fluidRow(
-                        column(6, textInput("interface_maf_filter_start", "Minimum value", placeholder = "0")),
-                        column(6, textInput("interface_maf_filter_end", "Maximum value", placeholder = "1"))
-                      ),
-                      br(),
-                      withLoader(htmlOutput("filter_variants_by_maf_confirmation"), type = "html", loader = "dnaspin"),
-                      linebreaks(3),
-                      h4("Download the MAF filtered VCF file."),
-                      br(),
-                      fluidRow(
-                        column(6, textInput("download_interface_filtered_variants_maf_filename", "Enter file Name", value = "VCF_file_maf_filtered")),
-                        column(6, downloadButton("download_interface_filtered_variants_maf", "Download .vcf.gz"))
-                      ),
-             ),
+             # tabPanel("Allele Frequency", value = "allele_frequency",
+             #          h4("Filter variants based on Minor Allele Frequency (MAF)"),
+             #          br(),
+             #          p("MAF refers to the frequency at which the second most common allele occurs in a given population"),
+             #          p("Please select all of the parameters below to start the allele-frequency-based filtration process. If any of them are not entered, an empty VCF file will be generated."),
+             #          br(),
+             #          h5("Select a range of MAF"),
+             #          fluidRow(
+             #            column(6, textInput("interface_maf_filter_start", "Minimum value", placeholder = "0")),
+             #            column(6, textInput("interface_maf_filter_end", "Maximum value", placeholder = "1"))
+             #          ),
+             #          br(),
+             #          withLoader(htmlOutput("filter_variants_by_maf_confirmation"), type = "html", loader = "dnaspin"),
+             #          linebreaks(3),
+             #          h4("Download the MAF filtered VCF file."),
+             #          br(),
+             #          fluidRow(
+             #            column(6, textInput("download_interface_filtered_variants_maf_filename", "Enter file Name", value = "VCF_file_maf_filtered")),
+             #            column(6, downloadButton("download_interface_filtered_variants_maf", "Download .vcf.gz"))
+             #          ),
+             # ),
              
              
              id = "Interface",
@@ -859,6 +861,7 @@ ui <- navbarPage("SCI-VCF",
            br(),
            # print wait message here
            textOutput("wait_message_view_csv"),
+           linebreaks(3),
            hr(),
            linebreaks(3),
            p("Search individual columns using the tab below the header. To sort entries, click on the respective column header. Adjust column width by resizing header cells. Page navigation options are present below the table."),
@@ -915,7 +918,7 @@ ui <- navbarPage("SCI-VCF",
            br(),
            h3("Citation"),
            br(),
-           p("..."),
+           htmlOutput("cite"),
            linebreaks(3),
            fluidRow(
              column(10, hr()),

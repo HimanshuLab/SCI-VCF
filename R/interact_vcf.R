@@ -1,4 +1,9 @@
-# RScript containing modules that enable user to interact with vcf file
+###
+# Code: R/interact.R
+# Author: Venkatesh K
+# Function: Contains modules that enable user to interact with the genetic variants in VCF file
+###
+
 
 view_metadata <- function(vcfR_metadata){
   ##
@@ -195,6 +200,8 @@ create_vcf_from_variant_table <- function(variant_table, metadata){
 
 # vcf_file_1 <- read.vcfR("/Users/venkateshk/Desktop/IBSE-IITM/SCI-VCF-complete-directory/sci-vcf_development/vcf_files/HG002_subset.vcf.gz")
 # vcf_file_2 <- read.vcfR("/Users/venkateshk/Desktop/IBSE-IITM/SCI-VCF-complete-directory/case_study/temp.vcf")
+
+# length(vcf_file_2@meta)
 
 # unique(vcf_file_1@fix[,"CHROM"])
 # unique(vcf_file_1@fix[,"FILTER"])

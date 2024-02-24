@@ -1,3 +1,10 @@
+###
+# Code: R/global.R
+# Author: Venkatesh K
+# Function: Calls R/ui.R and R/server.R to run SCI-VCF
+###
+
+
 # define all required libraries and load them
 required_libraries <- c("here", "vcfR", "ggplot2", "scales", "eulerr" ,"dplyr", 
                         "tidyr", "reshape2", "shiny", "shinycustomloader", "reactable",

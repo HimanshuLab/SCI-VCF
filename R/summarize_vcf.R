@@ -1,4 +1,8 @@
-# RScript containing modules that summarize a VCF file
+###
+# Code: R/summarize_vcf.R
+# Author: Venkatesh K
+# Function: Contains modules that summarizes a VCF file
+###
 
 # Function to create summary of the VCF file
 summarize_vcf <- function(vcf_file, break_multiallelic_sites = TRUE, remove_duplicated_entries = TRUE) {

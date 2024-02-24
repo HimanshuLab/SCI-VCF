@@ -1,4 +1,9 @@
-# RScript containing modules that compare the variants in two VCF files
+###
+# Code: R/compare_vcf.R
+# Author: Venkatesh K
+# Function: Contains modules that compare the genetic variants in two VCF files
+###
+
 
 
 # Function to compare two VCF files and return the summaries and sets for the three regions in Venn diagram
