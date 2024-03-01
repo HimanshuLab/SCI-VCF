@@ -350,7 +350,7 @@ ui <- navbarPage("SCI-VCF",
                       downloadButton("download_summary_statistics", "Download .csv"),
                       
                       linebreaks(5),
-                      textOutput("venkatesh_signing_off"),
+                      htmlOutput("venkatesh_signing_off"),
                       linebreaks(3),
                       fluidRow(
                         column(2, actionButton("summarize_download_list_previous", icon = icon("circle-chevron-left"), label = "Previous", width = 100)),
@@ -613,7 +613,7 @@ ui <- navbarPage("SCI-VCF",
                         column(6, downloadButton("download_com_var_right_and_left", "Download .csv"))
                       ),
                       linebreaks(5),
-                      textOutput("venkatesh_signing_off_again"),
+                      htmlOutput("venkatesh_signing_off_again"),
                       linebreaks(3),
                       fluidRow(
                         column(2, actionButton("compare_download_vars_previous", icon = icon("circle-chevron-left"), label = "Previous", width = 100)),

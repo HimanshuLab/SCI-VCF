@@ -125,7 +125,7 @@ server <- function(input, output, session) {
   
   output$wait_message_2 <- renderText({
     req(vcf_summaries())
-    "<font color =\"#e2725b\"><i>
+    "<font color =\"#228b22\"><i>
     The VCF file is processed. All tabs are populated. Happy exploration!
     </i></font>"}
   )
@@ -295,7 +295,10 @@ server <- function(input, output, session) {
   # Print note for downloading summary statistics
   output$venkatesh_signing_off <- renderText({
     req(vcf_summaries())
-    "Have a great day!"
+    "<font color =\"#228b22\"><i>
+    Have a great day!
+    <br>
+    </i></font>"
     })
     
   # Add functionalities to next/previous buttons in summarize tab
@@ -432,7 +435,7 @@ server <- function(input, output, session) {
   
   output$wait_message_compare_2 <- renderText({
     req(vcf_comp_summary_both())
-    "<font color =\"#e2725b\"><i>
+    "<font color =\"#228b22\"><i>
     The VCF files are processed. All tabs are populated. Happy exploration!
     <br>
     </i></font>"}
@@ -587,7 +590,10 @@ server <- function(input, output, session) {
   
   output$venkatesh_signing_off_again <- renderText({
     req(vcf_comp_summary_both())
-    "Have a great day!"
+    "<font color =\"#228b22\"><i>
+    Have a great day!
+    <br>
+    </i></font>"
   })
   
   # Add functionalities to next/previous buttons in compare tab
@@ -729,7 +735,7 @@ server <- function(input, output, session) {
   # Print a user message once the uploaded VCF file is read
   output$wait_message_interface <- renderText({
     req(vcf_interface_table())
-    "<font color =\"#e2725b\"><i>
+    "<font color =\"#228b22\"><i>
     The VCF file is processed. All tabs are populated. Happy exploration!
     </i></font>"}
   )
@@ -774,7 +780,7 @@ server <- function(input, output, session) {
   output$sort_variants_confirmation <- renderText({
     req(vcf_sorted_table())
     paste("Selected parameters are", input$interface_sort_variants, "and", input$interface_add_variant_ids, ".",
-    "<font color =\"#e2725b\"><i>
+    "<font color =\"##228b22\"><i>
     <br> The VCF file is sorted. You can proceed with the download! <br>
     </i></font>")
     }
@@ -807,7 +813,7 @@ server <- function(input, output, session) {
   output$filter_variants_by_site_confirmation <- renderText({
     req(vcf_site_filtered_table(), input$interface_contig_filter, input$interface_pos_filter_start, input$interface_pos_filter_end)
     paste("Selected genomic region(s) is (are)", input$interface_contig_filter, ":", input$interface_pos_filter_start, "-", input$interface_pos_filter_end, 
-    "<font color =\"#e2725b\"><i>
+    "<font color =\"#228b22\"><i>
     <br> The VCF file is filtered for selected sites. You can proceed with the download! <br>
     </i></font>")
     }
@@ -840,7 +846,7 @@ server <- function(input, output, session) {
   output$filter_variants_by_quality_confirmation <- renderText({
     req(vcf_quality_filtered_table(), input$interface_quality_filter, input$interface_qual_filter_start, input$interface_qual_filter_end)
     paste("Selected quality metrics are ", input$interface_quality_filter, ",", input$interface_qual_filter_start, ", and", input$interface_qual_filter_end, ".",
-    "<font color =\"#e2725b\"><i>
+    "<font color =\"##228b22\"><i>
     <br> The VCF file is filtered for quality. You can proceed with the download! <br>
     </i></font>")
   }
@@ -870,7 +876,7 @@ server <- function(input, output, session) {
   output$filter_variants_by_variant_type_confirmation <- renderText({
     req(vcf_type_filtered_table(), input$interface_variant_type_filter)
     paste("Selected variant type(s) is (are)", unlist(input$interface_variant_type_filter), ".", 
-          "<font color =\"#e2725b\"><i>
+          "<font color =\"#228b22\"><i>
     <br>The VCF file is filtered for variant type. You can proceed with the download! <br>
     </i></font>")
     
