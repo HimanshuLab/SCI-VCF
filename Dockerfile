@@ -45,6 +45,9 @@ RUN Rscript -e 'install.packages("shiny")'
 RUN Rscript -e 'install.packages("shinycustomloader")'
 RUN Rscript -e 'install.packages("colourpicker")'
 RUN Rscript -e 'install.packages("plotly")'
+RUN Rscript -e 'install.packages("reactable")'
+RUN Rscript -e 'install.packages("htmltools")'
+
 
 # copy necessary files
 ## sci-vcf.proj
