@@ -29,7 +29,8 @@ get_all_variant_distribution <- function(vcf_file, selected_contig, selected_bin
     config(displayModeBar = "static", displaylogo = FALSE, 
            modeBarButtonsToRemove = list("sendDataToCloud", "autoScale2d",
                                          "hoverClosestCartesian","hoverCompareCartesian", 
-                                         "select2d", "lasso2d","zoom2d", "toggleSpikelines")
+                                         "select2d", "lasso2d","zoom2d", "toggleSpikelines"),
+           toImageButtonOptions = list(filename = "summarize_dist_vars", scale = 4)
     ) 
                         
   rm(vcf_file_subset)
@@ -64,7 +65,8 @@ get_snp_type_plot <- function(vcf_summary, col_fill, plot_title, x_label, y_labe
     config(displayModeBar = "static", displaylogo = FALSE, 
            modeBarButtonsToRemove = list("sendDataToCloud", "autoScale2d",
                                          "hoverClosestCartesian","hoverCompareCartesian", 
-                                         "select2d", "lasso2d","zoom2d", "toggleSpikelines")
+                                         "select2d", "lasso2d","zoom2d", "toggleSpikelines"),
+           toImageButtonOptions = list(filename = "summarize_dist_snps", scale = 4)
            )
   
   return(snp_type_plotly) 
@@ -101,7 +103,8 @@ get_indel_size_distribution_plot <- function(indel_sizes, col_fill_ins, col_fill
     config(displayModeBar = "static", displaylogo = FALSE, 
            modeBarButtonsToRemove = list("sendDataToCloud", "autoScale2d",
                                          "hoverClosestCartesian","hoverCompareCartesian", 
-                                         "select2d", "lasso2d","zoom2d", "toggleSpikelines")
+                                         "select2d", "lasso2d","zoom2d", "toggleSpikelines"),
+           toImageButtonOptions = list(filename = "summarize_dist_indels", scale = 4)
     )
   rm(insertion_sizes)
   rm(deletion_sizes)
@@ -153,7 +156,8 @@ get_summary_stat_distribution <- function(vcf_sum_table, summary_stat, plot_type
                               config(displayModeBar = "static", displaylogo = FALSE, 
                                    modeBarButtonsToRemove = list("sendDataToCloud", "autoScale2d",
                                                                "hoverClosestCartesian","hoverCompareCartesian", 
-                                                               "select2d", "lasso2d","zoom2d", "toggleSpikelines")
+                                                               "select2d", "lasso2d","zoom2d", "toggleSpikelines"),
+                                   toImageButtonOptions = list(filename = "summarize_stat_one", scale = 4)
                               )
   return(summary_stat_bar_plotly)
 }
@@ -210,7 +214,8 @@ get_summary_comparison_plot <- function(vcf_sum_table, summary_stat_1, summary_s
     config(displayModeBar = "static", displaylogo = FALSE, 
            modeBarButtonsToRemove = list("sendDataToCloud", "autoScale2d",
                                          "hoverClosestCartesian","hoverCompareCartesian", 
-                                         "select2d", "lasso2d","zoom2d", "toggleSpikelines")
+                                         "select2d", "lasso2d","zoom2d", "toggleSpikelines"),
+           toImageButtonOptions = list(filename = "summarize_stat_two", scale = 4)
     )
   return(summary_comparison_plotly)
 }
@@ -236,7 +241,9 @@ get_overall_summary_plot <- function(vcf_sum_table, selected_variant_type, plot_
       add_pie(hole = 0.6) %>% 
       layout(title = plot_title,  showlegend = T,
              xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-             yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+             yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE)) %>%
+      config(displayModeBar = "static", displaylogo = FALSE,
+             toImageButtonOptions = list(filename = "summarize_overall", scale = 4))
   }
   
   if(selected_variant_type == "SNPs"){
@@ -247,7 +254,9 @@ get_overall_summary_plot <- function(vcf_sum_table, selected_variant_type, plot_
       add_pie(hole = 0.6) %>% 
       layout(title = plot_title,  showlegend = T,
              xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-             yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+             yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE)) %>%
+      config(displayModeBar = "static", displaylogo = FALSE,
+             toImageButtonOptions = list(filename = "summarize_overall", scale = 4))
   }
   
   if(selected_variant_type == "INDELs"){
@@ -258,14 +267,17 @@ get_overall_summary_plot <- function(vcf_sum_table, selected_variant_type, plot_
       add_pie(hole = 0.6) %>% 
       layout(title = plot_title,  showlegend = T,
              xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-             yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+             yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE)) %>%
+      config(displayModeBar = "static", displaylogo = FALSE,
+             toImageButtonOptions = list(filename = "summarize_overall", scale = 4))
     
   }
   
   
   #make donut plots for all variants
   donut_plot %>%
-    config(displayModeBar = "static", displaylogo = FALSE)
+    config(displayModeBar = "static", displaylogo = FALSE,
+           toImageButtonOptions = list(filename = "summarize_overall", scale = 4))
   
   
   return(donut_plot)
@@ -334,7 +346,8 @@ get_all_variant_distribution_in_ech_set <- function(vcf_set_list, selected_varia
     config(displayModeBar = "static", displaylogo = FALSE, 
            modeBarButtonsToRemove = list("sendDataToCloud", "autoScale2d",
                                          "hoverClosestCartesian","hoverCompareCartesian", 
-                                         "select2d", "lasso2d","zoom2d", "toggleSpikelines")
+                                         "select2d", "lasso2d","zoom2d", "toggleSpikelines"),
+           toImageButtonOptions = list(filename = "compare_dist_vars", scale = 4)
     ) 
   
   rm(vcf_file_subset)
@@ -398,7 +411,8 @@ get_summary_stat_distribution_in_each_set <- function(vcf_comp_sum_left, vcf_com
     config(displayModeBar = "static", displaylogo = FALSE, 
            modeBarButtonsToRemove = list("sendDataToCloud", "autoScale2d",
                                          "hoverClosestCartesian","hoverCompareCartesian", 
-                                         "select2d", "lasso2d","zoom2d", "toggleSpikelines")
+                                         "select2d", "lasso2d","zoom2d", "toggleSpikelines"),
+           toImageButtonOptions = list(filename = "compare_stats_bar", scale = 4)
     )
   return(summary_stat_bar_plotly)
 }
@@ -434,7 +448,9 @@ get_overall_summary_distribution_for_each_set <- function(vcf_comp_sum_left, vcf
       add_pie(hole = 0.6) %>% 
       layout(title = plot_title,  showlegend = T,
              xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-             yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+             yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE)) %>%
+      config(displayModeBar = "static", displaylogo = FALSE,
+             toImageButtonOptions = list(filename = "compare_summary_overall", scale = 4))
   }
   
   if(selected_variant_type == "SNPs"){
@@ -445,7 +461,9 @@ get_overall_summary_distribution_for_each_set <- function(vcf_comp_sum_left, vcf
       add_pie(hole = 0.6) %>% 
       layout(title = plot_title,  showlegend = T,
              xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-             yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+             yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))%>%
+      config(displayModeBar = "static", displaylogo = FALSE,
+             toImageButtonOptions = list(filename = "compare_summary_overall", scale = 4))
   }
   
   if(selected_variant_type == "INDELs"){
@@ -456,14 +474,17 @@ get_overall_summary_distribution_for_each_set <- function(vcf_comp_sum_left, vcf
       add_pie(hole = 0.6) %>% 
       layout(title = plot_title,  showlegend = T,
              xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-             yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+             yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE)) %>%
+      config(displayModeBar = "static", displaylogo = FALSE,
+             toImageButtonOptions = list(filename = "compare_summary_overall", scale = 4))
     
   }
   
   
   # customize donut plots for all variant types
   donut_plot %>%
-    config(displayModeBar = "static", displaylogo = FALSE)
+    config(displayModeBar = "static", displaylogo = FALSE,
+           toImageButtonOptions = list(filename = "compare_summary_overall", scale = 4))
   
   
   return(donut_plot)
