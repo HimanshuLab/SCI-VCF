@@ -886,7 +886,18 @@ ui <- navbarPage("SCI-VCF",
   tabPanel("Quick Guide",
            h3("Quick Guide"),
            br(),
-           htmlOutput("quick_quide_intro"),
+           fluidRow(
+             column(7,img(src='SCI-VCF_workflow.png', height = "100%", width = "100%", align = "right")),
+             column(5, htmlOutput("quick_quide_intro"))
+           ),
+           hr(),
+           
+           fluidRow(
+             column(7, img(src='SCI-VCF_tabs.png', height = "100%", width = "100%", align = "left-middle")),
+             column(5, htmlOutput("quick_quide_content"))
+           )
+           
+           ,
            linebreaks(3),
            fluidRow(
              column(10, hr()),
